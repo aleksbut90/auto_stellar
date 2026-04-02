@@ -1,0 +1,208 @@
+{
+  "collection": {
+    "areas": {
+      "collection_tabs": [
+        414,
+        212,
+        768,
+        43
+      ],
+      "dungeon_list": [
+        420,
+        253,
+        231,
+        572
+      ],
+      "collection_items": [
+        658,
+        295,
+        809,
+        506
+      ]
+    },
+    "buttons": {
+      "auto_refill": [
+        1200,
+        502
+      ],
+      "register": [
+        1079,
+        754
+      ],
+      "yes": [
+        968,
+        617
+      ],
+      "page_2": [
+        534,
+        851
+      ],
+      "page_3": [
+        565,
+        847
+      ],
+      "page_4": [
+        592,
+        850
+      ],
+      "arrow_right": [
+        626,
+        847
+      ]
+    },
+    "speed": {
+      "delay_ms": 31
+    }
+  },
+  "heils_clicker": {
+    "areas": {
+      "collection_tabs": null,
+      "dungeon_list": null,
+      "collection_items": null
+    },
+    "buttons": {
+      "auto_refill": null,
+      "register": null,
+      "yes": null,
+      "page_2": null,
+      "page_3": null,
+      "page_4": null,
+      "arrow_right": null,
+      "click_position": [
+        193,
+        898
+      ]
+    },
+    "speed": {
+      "delay_ms": 12
+    }
+  },
+  "arrival": {
+    "areas": {
+      "collection_tabs": null,
+      "dungeon_list": null,
+      "collection_items": null,
+      "stats_area": [
+        1047,
+        559,
+        263,
+        76
+      ],
+      "grade_area": [
+        1057,
+        515,
+        128,
+        49
+      ]
+    },
+    "buttons": {
+      "auto_refill": null,
+      "register": null,
+      "yes": null,
+      "page_2": null,
+      "page_3": null,
+      "page_4": null,
+      "arrow_right": null,
+      "change_button": [
+        1150,
+        661
+      ],
+      "apply_button": [
+        1281,
+        731
+      ]
+    },
+    "speed": {
+      "delay_ms": 1000
+    },
+    "custom": {
+      "offensive_stat_entries": [
+        {
+          "name": "Arrival Skill Cool Time decreased.",
+          "min_value": "Grade 2"
+        },
+        {
+          "name": "Arrival Skill Buff Time UP",
+          "min_value": "8s"
+        },
+        {
+          "name": "Max Critical Rate",
+          "min_value": "1%"
+        }
+      ],
+      "defensive_stat_entries": [
+        {
+          "name": "Resist Critical Damage",
+          "min_value": "18%"
+        },
+        {
+          "name": "Resist Skill Amp",
+          "min_value": "8%"
+        },
+        {
+          "name": "Absorb Damage (2)",
+          "min_value": "800"
+        }
+      ],
+      "logic_mode": "OR"
+    }
+  },
+  "stellar": {
+    "areas": {
+      "collection_tabs": null,
+      "dungeon_list": null,
+      "collection_items": null,
+      "ocr_area": [
+        982,
+        230,
+        311,
+        87
+      ]
+    },
+    "buttons": {
+      "auto_refill": null,
+      "register": null,
+      "yes": null,
+      "page_2": null,
+      "page_3": null,
+      "page_4": null,
+      "arrow_right": null,
+      "imprint_button": [
+        1155,
+        734
+      ]
+    },
+    "speed": {
+      "delay_ms": 1000
+    },
+    "custom": {
+      "stat_entries": [
+        {
+          "name": "Ignore Accuracy",
+          "min_value": "3"
+        },
+        {
+          "name": "PVE Critical DMG",
+          "min_value": "2"
+        },
+        {
+          "name": "Critical DMG.",
+          "min_value": "1"
+        },
+        {
+          "name": "All Attack UP",
+          "min_value": ""
+        },
+        {
+          "name": "Defense",
+          "min_value": "36"
+        },
+        {
+          "name": "PVE Ignore",
+          "min_value": "3"
+        }
+      ],
+      "effect_delay_ms": 111
+    }
+  }
+}
