@@ -5,13 +5,13 @@ from core.settings_manager import SettingsManager
 
 
 class HeilsClickerTab:
-    """Simple continuous clicker that clicks at a defined point until stopped."""
+    """Простой непрерывный кликер, который кликает в определенной точке до остановки."""
 
     def __init__(self, parent_frame, main_window):
         self.parent_frame = parent_frame
         self.main_window = main_window
 
-        # Settings manager for persistence (using unified settings.json)
+        # Менеджер настроек для сохранения (используя unified settings.json)
         self.settings = SettingsManager(tab_section="heils_clicker")
 
         self.automation = HeilsClickerAutomation(
@@ -19,37 +19,37 @@ class HeilsClickerTab:
             main_window.update_status
         )
 
-        # UI state
+        # Состояние UI
         self.click_coords = None
-        self.click_coord_var = tk.StringVar(value="Not set")
-        self.delay_var = tk.IntVar(value=200)  # ms
+        self.click_coord_var = tk.StringVar(value="Не установлена")
+        self.delay_var = tk.IntVar(value=200)  # мс
 
         self.create_ui()
         
-        # Load saved settings
+        # Загрузка сохраненных настроек
         self.load_saved_settings()
 
     def create_ui(self):
         main_frame = ttk.Frame(self.parent_frame, padding="10")
         main_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Content frame that can shrink (everything except buttons)
+        # Фрейм контента, который может сжиматься (все кроме кнопок)
         content_frame = ttk.Frame(main_frame)
         content_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Coordinates section
-        coords_frame = ttk.LabelFrame(content_frame, text="Click Target", padding="10")
+        # Секция координат
+        coords_frame = ttk.LabelFrame(content_frame, text="Цель клика", padding="10")
         coords_frame.pack(fill=tk.X, pady=(0, 10))
 
         coord_row = ttk.Frame(coords_frame)
         coord_row.pack(fill=tk.X, pady=2)
 
-        ttk.Label(coord_row, text="Position:").pack(side=tk.LEFT)
+        ttk.Label(coord_row, text="Позиция:").pack(side=tk.LEFT)
         ttk.Label(coord_row, textvariable=self.click_coord_var, foreground="blue").pack(side=tk.LEFT, padx=(5, 0))
-        ttk.Button(coord_row, text="Set Click Position", command=self.set_click_position).pack(side=tk.RIGHT)
+        ttk.Button(coord_row, text="Установить позицию клика", command=self.set_click_position).pack(side=tk.RIGHT)
 
-        # Delay section
-        delay_frame = ttk.LabelFrame(content_frame, text="Delay Between Clicks (ms)", padding="10")
+        # Секция задержки
+        delay_frame = ttk.LabelFrame(content_frame, text="Задержка между кликами (мс)", padding="10")
         delay_frame.pack(fill=tk.X, pady=(0, 10))
 
         delay_row = ttk.Frame(delay_frame)
