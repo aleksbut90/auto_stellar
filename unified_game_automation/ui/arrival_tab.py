@@ -220,25 +220,25 @@ class ArrivalTab:
             self.settings.set_button("apply_button", (rel_x, rel_y))
         
         self.main_window.capture_button_coordinates(
-            "Apply",
-            "Click on the 'Apply' button in the game window.\n"
-            "The coordinates will be captured automatically.",
+            "Применить",
+            "Кликните по кнопке 'Применить' в окне игры.\n"
+            "Координаты будут захвачены автоматически.",
             on_success
         )
 
     def set_change_button(self):
-        """Set the change button coordinates"""
+        """Установка координат кнопки Изменить"""
         def on_success(rel_x, rel_y):
             self.change_button_coords = (rel_x, rel_y)
             self.automation.set_change_button(self.change_button_coords)
             self.change_coord_var.set(f"({rel_x}, {rel_y})")
-            # Save to settings
+            # Сохранение в настройки
             self.settings.set_button("change_button", (rel_x, rel_y))
         
         self.main_window.capture_button_coordinates(
-            "Change",
-            "Click on the 'Change' button in the game window.\n"
-            "The coordinates will be captured automatically.",
+            "Изменить",
+            "Кликните по кнопке 'Изменить' в окне игры.\n"
+            "Координаты будут захвачены автоматически.",
             on_success
         )
 
@@ -262,14 +262,14 @@ class ArrivalTab:
         self.main_window.define_ocr_area(area_callback)
 
     def define_grade_area(self):
-        """Define the OCR area for grade detection"""
+        """Определение области OCR для обнаружения ранга"""
         def area_callback(area):
             self.grade_area = area
             self.automation.set_grade_area(area)
             if self.grade_area_status_var:
-                self.grade_area_status_var.config(text="✓ Grade area set", foreground="green")
-            self.main_window.update_status(f"Grade OCR area defined: {area}")
-            # Save to settings
+                self.grade_area_status_var.config(text="✓ Область ранга установлена", foreground="green")
+            self.main_window.update_status(f"Область OCR для ранга определена: {area}")
+            # Сохранение в настройки
             self.settings.set_area("grade_area", area)
 
         self.main_window.define_ocr_area(area_callback)
@@ -507,16 +507,16 @@ class ArrivalTab:
             self.grade_area = grade_area
             self.automation.set_grade_area(grade_area)
             if self.grade_area_status_var:
-                self.grade_area_status_var.config(text="✓ Grade area set", foreground="green")
+                self.grade_area_status_var.config(text="✓ Область ранга установлена", foreground="green")
         
-        # Load apply button
+        # Загрузка кнопки Применить
         apply_coords = self.settings.get_button("apply_button")
         if apply_coords:
             self.apply_button_coords = apply_coords
             self.automation.set_apply_button(apply_coords)
             self.apply_coord_var.set(f"({apply_coords[0]}, {apply_coords[1]})")
         
-        # Load change button
+        # Загрузка кнопки Изменить
         change_coords = self.settings.get_button("change_button")
         if change_coords:
             self.change_button_coords = change_coords
@@ -690,16 +690,16 @@ class ArrivalTab:
                     grade_required = True
                 desired_stats['defensive'].append((stat_name, def_val, meta))
 
-        # If grade-based detection is needed, ensure grade area is defined
+        # Если требуется обнаружение по рангу, убедиться что область ранга определена
         if grade_required and not self.grade_area:
-            self.main_window.update_status("Set the Grade OCR area before starting (required for grade-based stats)")
+            self.main_window.update_status("Установите область OCR для ранга перед запуском (требуется для статов на основе ранга)")
             self.main_window.clear_running_tool()
             return
 
-        # Display what we're looking for
+        # Отображение того, что ищем
         def format_requirement(name, val, meta):
             if meta and meta.get("mode") == "grade":
-                return f"{name} (Grade ≥{val})"
+                return f"{name} (Ранг ≥{val})"
             return f"{name} (≥{val})"
 
         off_stats_display = []
@@ -710,42 +710,42 @@ class ArrivalTab:
         if desired_stats['defensive']:
             def_stats_display = [format_requirement(name, val, meta) for name, val, meta in desired_stats['defensive']]
         
-        status_msg = "Looking for: "
+        status_msg = "Ищем: "
         if off_stats_display and def_stats_display:
-            status_msg += f"Offensive: {' OR '.join(off_stats_display)} AND Defensive: {' OR '.join(def_stats_display)}"
+            status_msg += f"Атакующие: {' ИЛИ '.join(off_stats_display)} И Защитные: {' ИЛИ '.join(def_stats_display)}"
         elif off_stats_display:
-            status_msg += f"Offensive: {' OR '.join(off_stats_display)}"
+            status_msg += f"Атакующие: {' ИЛИ '.join(off_stats_display)}"
         elif def_stats_display:
-            status_msg += f"Defensive: {' OR '.join(def_stats_display)}"
+            status_msg += f"Защитные: {' ИЛИ '.join(def_stats_display)}"
         
         self.main_window.update_status(status_msg)
 
-        # Get logic setting (OR or AND)
+        # Получение настройки логики (ИЛИ или И)
         logic_mode = self.logic_var.get()
         
-        # Start automation
+        # Запуск автоматизации
         if self.automation.start(desired_stats, logic_mode=logic_mode):
-            self.main_window.update_status("Arrival skill automation started")
+            self.main_window.update_status("Автоматизация Крыльев Силы запущена")
         else:
             self.main_window.clear_running_tool()
 
     def stop_automation(self):
-        """Stop the arrival skill automation"""
+        """Остановка автоматизации Крыльев Силы"""
         self.automation.stop()
         self.main_window.clear_running_tool()
-        self.main_window.update_status("Arrival skill automation stopped")
+        self.main_window.update_status("Автоматизация Крыльев Силы остановлена")
 
     def show_grade_area_info(self):
-        """Show information about the Grade OCR area"""
+        """Показать информацию об области OCR для ранга"""
         info_text = (
-            "Grade OCR Area Information:\n\n"
-            "This area is only required for the 'Arrival Skill Cool Time Decreased' stat.\n\n"
-            "When defining this area, select the region in the game where the grade text appears "
-            "(e.g., '1st Grade', '2nd Grade', '3rd Grade', etc.).\n\n"
-            "This area is used to detect the grade level when the stat value cannot be read "
-            "due to UI collision."
+            "Информация об области OCR для ранга:\n\n"
+            "Эта область требуется только для стата 'Время перезарядки навыка прибытия уменьшено'.\n\n"
+            "При определении этой области выберите регион в игре, где отображается текст ранга "
+            "(например, '1-й ранг', '2-й ранг', '3-й ранг' и т.д.).\n\n"
+            "Эта область используется для обнаружения уровня ранга, когда значение стата не может быть прочитано "
+            "из-за наложения интерфейса."
         )
-        messagebox.showinfo("Grade OCR Area Info", info_text)
+        messagebox.showinfo("Информация об области ранга", info_text)
 
     def emergency_stop(self):
         """Emergency stop the automation"""
