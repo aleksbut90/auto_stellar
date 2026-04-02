@@ -1,4 +1,1 @@
-```
-# PowerShell build artifacts
-build_exe.ps1
-```
+Nothing should be ignored based on the provided file changes. The modification of `requirements_minimal.txt` is a source/config file change, which doesn't require any new ignore rules.
