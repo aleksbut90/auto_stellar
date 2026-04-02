@@ -18,7 +18,7 @@ Write-Host ""
 
 # Step 2: Create new virtual environment
 Write-Host "[2/6] Creating new virtual environment..." -ForegroundColor Yellow
-python -m venv venv
+py -m venv venv
 if ($LASTEXITCODE -ne 0) {
     Write-Host "      ERROR: Failed to create virtual environment!" -ForegroundColor Red
     exit 1
