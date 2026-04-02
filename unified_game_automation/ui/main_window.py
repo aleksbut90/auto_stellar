@@ -1,5 +1,5 @@
 # Main tabbed window for the Unified Game Automation Tool
-# Title: "Stellar and Arrival Skill Automation"
+# Title: "Автоматизация Звездной Россыпи и Крыльев Силы"
 
 import tkinter as tk
 from tkinter import ttk, messagebox
@@ -17,65 +17,65 @@ from ui.help_tab import HelpTab
 
 class MainWindow:
     def __init__(self):
-        """Initialize the main tabbed window"""
+        """Инициализация главного окна с вкладками"""
         self.root = tk.Tk()
-        self.root.title("Stellar and Arrival Skill Automation")
+        self.root.title("Автоматизация Звездной Россыпи и Крыльев Силы")
         self.root.geometry("700x800")
         self.root.attributes("-topmost", True)
 
-        # Track which tool is currently running (mutual exclusion)
+        # Отслеживание текущего запущенного инструмента (взаимное исключение)
         self.current_running_tool = None
 
-        # Initialize status variable first
-        self.status_var = tk.StringVar(value="Initializing...")
+        # Инициализация переменной статуса
+        self.status_var = tk.StringVar(value="Инициализация...")
 
-        # Shared components (after status_var is created)
+        # Общие компоненты (после создания status_var)
         self.game_connector = GameConnector(self.update_status)
         self.ocr_engine = OCREngine(self.update_status)
 
-        # Set up emergency kill switch (ESC key)
+        # Настройка аварийной остановки (клавиша ESC)
         keyboard.add_hotkey('esc', self.emergency_stop)
 
-        # Create UI
+        # Создание UI
         self.create_ui()
 
-        # Set up window close handler
+        # Настройка обработчика закрытия окна
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     def create_ui(self):
-        """Create the main UI with tabs"""
-        # Main frame
+        """Создание главного UI с вкладками"""
+        # Главный фрейм
         main_frame = ttk.Frame(self.root, padding="10")
         main_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Auto-connect to game and show status
+        # Авто-подключение к игре и отображение статуса
         self.auto_connect_to_game()
 
-        # Emergency stop info - positioned at top for better visibility
+        # Информация об аварийной остановке - размещена сверху для лучшей видимости
         emergency_frame = ttk.Frame(main_frame)
         emergency_frame.pack(fill=tk.X, pady=(0, 10))
-        emergency_label = ttk.Label(emergency_frame, text="Emergency Stop: ESC",
+        emergency_label = ttk.Label(emergency_frame, text="Аварийная остановка: ESC",
                                    foreground="red", font=("Arial", 9, "bold"))
         emergency_label.pack(anchor=tk.W)
 
-        # Unified Start/Stop controls
+        # Универсальные кнопки Старт/Стоп
         control_frame = ttk.Frame(main_frame)
         control_frame.pack(fill=tk.X, pady=(0, 10))
         
-        self.btn_start = ttk.Button(control_frame, text="Start", command=self.unified_start, state=tk.DISABLED)
+        self.btn_start = ttk.Button(control_frame, text="Старт", command=self.unified_start, state=tk.DISABLED)
         self.btn_start.pack(side=tk.LEFT, padx=(0, 5))
         
-        self.btn_stop = ttk.Button(control_frame, text="Stop", command=self.unified_stop, state=tk.DISABLED)
+        self.btn_stop = ttk.Button(control_frame, text="Стоп", command=self.unified_stop, state=tk.DISABLED)
         self.btn_stop.pack(side=tk.LEFT)
 
-        # Create notebook for tabs
+        # Создание книги вкладок
         self.notebook = ttk.Notebook(main_frame)
         self.notebook.pack(fill=tk.BOTH, expand=True)
         
-        # Bind tab change event to stop automation when switching tabs
+        # Привязка события смены вкладки для остановки автоматизации при переключении
         self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_changed)
 
-        # Create tab frames
+        # Создание фреймов для вкладок
         arrival_frame = ttk.Frame(self.notebook)
         stellar_frame = ttk.Frame(self.notebook)
         collection_frame = ttk.Frame(self.notebook)
@@ -83,13 +83,13 @@ class MainWindow:
         troubleshooting_frame = ttk.Frame(self.notebook)
         help_frame = ttk.Frame(self.notebook)
 
-        # Add tabs to notebook (Arrival Skill first)
-        self.notebook.add(arrival_frame, text="Arrival Skill")
-        self.notebook.add(stellar_frame, text="Stellar System")
-        self.notebook.add(collection_frame, text="Collection Filler")
-        self.notebook.add(heils_frame, text="Heils Clicker")
-        self.notebook.add(help_frame, text="Help")
-        self.notebook.add(troubleshooting_frame, text="Troubleshooting")
+        # Добавление вкладок в книгу (Крылья Силы первыми)
+        self.notebook.add(arrival_frame, text="Крылья Силы")
+        self.notebook.add(stellar_frame, text="Звездная Россыпь")
+        self.notebook.add(collection_frame, text="Заполнитель Коллекции")
+        self.notebook.add(heils_frame, text="Heils Кликер")
+        self.notebook.add(help_frame, text="Помощь")
+        self.notebook.add(troubleshooting_frame, text="Решение Проблем")
 
         # Create tab instances
         self.arrival_tab = ArrivalTab(arrival_frame, self)
@@ -103,26 +103,26 @@ class MainWindow:
         self.update_unified_buttons()
 
     def auto_connect_to_game(self):
-        """Automatically connect to the game and show connection status"""
+        """Автоматическое подключение к игре и отображение статуса подключения"""
         if self.game_connector.connect_to_game():
-            # Get game window info for display
+            # Получение информации об окне игры для отображения
             window_rect = self.game_connector.get_window_rect()
             if window_rect:
-                window_info = f"Connected to game window ({window_rect.width}x{window_rect.height})"
+                window_info = f"Подключено к окну игры ({window_rect.width}x{window_rect.height})"
             else:
-                window_info = "Connected to game window"
+                window_info = "Подключено к окну игры"
             self.update_status(window_info)
         else:
-            self.update_status("Game not found")
+            self.update_status("Игра не найдена")
 
     def update_status(self, message):
-        """Update the status display"""
+        """Обновление отображения статуса"""
         self.status_var.set(message)
 
     def set_running_tool(self, tool_name):
-        """Set which tool is currently running (mutual exclusion)"""
+        """Установка текущего запущенного инструмента (взаимное исключение)"""
         if self.current_running_tool is not None and self.current_running_tool != tool_name:
-            self.update_status(f"Cannot start {tool_name}: {self.current_running_tool} is already running")
+            self.update_status(f"Невозможно запустить {tool_name}: {self.current_running_tool} уже запущен")
             return False
 
         self.current_running_tool = tool_name
@@ -130,29 +130,29 @@ class MainWindow:
         return True
 
     def clear_running_tool(self):
-        """Clear the currently running tool"""
+        """Очистка текущего запущенного инструмента"""
         self.current_running_tool = None
         self.update_unified_buttons()
     
     def update_unified_buttons(self):
-        """Update the unified Start/Stop buttons based on current state"""
+        """Обновление универсальных кнопок Старт/Стоп на основе текущего состояния"""
         if self.current_running_tool:
             self.btn_start.config(state=tk.DISABLED)
             self.btn_stop.config(state=tk.NORMAL)
         else:
-            # Check if current tab can be started
+            # Проверка возможности запуска текущей вкладки
             current_tab = self.get_current_tab()
             if current_tab and hasattr(current_tab, 'can_start'):
                 can_start = current_tab.can_start()
             else:
-                # Troubleshooting tab or other tabs without automation
+                # Вкладка решения проблем или другие вкладки без автоматизации
                 can_start = False
             
             self.btn_start.config(state=tk.NORMAL if can_start else tk.DISABLED)
             self.btn_stop.config(state=tk.DISABLED)
     
     def get_current_tab(self):
-        """Get the currently selected tab instance"""
+        """Получение экземпляра текущей выбранной вкладки"""
         try:
             selected_index = self.notebook.index(self.notebook.select())
             tabs = [
@@ -166,107 +166,107 @@ class MainWindow:
             if 0 <= selected_index < len(tabs):
                 return tabs[selected_index]
         except (AttributeError, tk.TclError):
-            # Tabs not fully initialized yet or notebook not ready
+            # Вкладки еще не полностью инициализированы или книга не готова
             pass
         return None
     
     def on_tab_changed(self, event=None):
-        """Handle tab change - stop automation if running"""
+        """Обработка смены вкладки - остановка автоматизации при переключении"""
         if self.current_running_tool:
             self.unified_stop()
         
-        # Update button states for new tab
+        # Обновление состояния кнопок для новой вкладки
         self.update_unified_buttons()
     
     def unified_start(self):
-        """Unified start method - starts automation for current tab"""
+        """Универсальный метод запуска - запускает автоматизацию для текущей вкладки"""
         current_tab = self.get_current_tab()
         if not current_tab:
             return
         
-        # Stop any running automation first
+        # Остановка любой запущенной автоматизации сначала
         if self.current_running_tool:
             self.unified_stop()
         
-        # Start the current tab's automation
+        # Запуск автоматизации текущей вкладки
         if hasattr(current_tab, 'start_automation'):
             current_tab.start_automation()
         elif hasattr(current_tab, 'start_clicking'):
             current_tab.start_clicking()
         
-        # Update buttons after starting
+        # Обновление кнопок после запуска
         self.update_unified_buttons()
     
     def unified_stop(self):
-        """Unified stop method - stops any running automation"""
+        """Универсальный метод остановки - останавливает любую запущенную автоматизацию"""
         if not self.current_running_tool:
             return
         
-        # Stop whichever tool is running
-        if self.current_running_tool == "Stellar System":
+        # Остановка whichever инструмент запущен
+        if self.current_running_tool == "Звездная Россыпь":
             self.stellar_tab.stop_automation()
-        elif self.current_running_tool == "Arrival Skill":
+        elif self.current_running_tool == "Крылья Силы":
             self.arrival_tab.stop_automation()
-        elif self.current_running_tool == "Collection Filler":
+        elif self.current_running_tool == "Заполнитель Коллекции":
             self.collection_tab.stop_automation()
-        elif self.current_running_tool == "Heils Clicker":
+        elif self.current_running_tool == "Heils Кликер":
             self.heils_clicker_tab.stop_clicking()
         
         self.clear_running_tool()
     
     def capture_button_coordinates(self, button_name, instruction_text, success_callback):
         """
-        Shared method for capturing button coordinates across all tabs.
+        Общий метод для захвата координат кнопок на всех вкладках.
         
         Args:
-            button_name: Name of the button (e.g., "Apply", "Change", "Imprint")
-            instruction_text: Custom instruction text to show in messagebox
-            success_callback: Function to call with (rel_x, rel_y) on success
+            button_name: Название кнопки (например, "Применить", "Изменить", "Запечатлеть")
+            instruction_text: Текст инструкции для отображения в messagebox
+            success_callback: Функция для вызова с (rel_x, rel_y) при успехе
         """
-        # Connect to game if needed
+        # Подключение к игре при необходимости
         if not self.game_connector.is_connected():
             if not self.game_connector.connect_to_game():
-                self.update_status("Game not found")
+                self.update_status("Игра не найдена")
                 return
         
-        self.update_status(f"Click {button_name} button...")
+        self.update_status(f"Нажмите кнопку {button_name}...")
         
-        # Change cursor to indicate click mode
+        # Изменение курсора для индикации режима клика
         self.root.config(cursor="crosshair")
         
         def capture_click():
-            """Capture the mouse click coordinates"""
+            """Захват координат клика мыши"""
             try:
-                # Wait for mouse click
+                # Ожидание клика мыши
                 mouse.wait(button='left')
                 x, y = mouse.get_position()
                 
-                # Convert to window-relative coordinates
+                # Преобразование в относительные координаты окна
                 rel_x, rel_y, success = self.game_connector.convert_to_window_coords(x, y)
                 
                 if success:
                     success_callback(rel_x, rel_y)
-                    self.update_status(f"{button_name} set at ({rel_x}, {rel_y})")
+                    self.update_status(f"{button_name} установлена на ({rel_x}, {rel_y})")
                 else:
-                    self.update_status("Failed to convert coordinates")
+                    self.update_status("Не удалось преобразовать координаты")
             
             except Exception as e:
-                self.update_status(f"Error: {str(e)}")
+                self.update_status(f"Ошибка: {str(e)}")
             finally:
-                # Reset cursor
+                # Сброс курсора
                 self.root.config(cursor="")
         
-        # Start capture in thread
+        # Запуск захвата в потоке
         threading.Thread(target=capture_click, daemon=True).start()
     
     def define_ocr_area(self, area_callback):
         """
-        Shared method for defining OCR area across all tabs.
+        Общий метод для определения области OCR на всех вкладках.
         
         Args:
-            area_callback: Function to call with the selected area
+            area_callback: Функция для вызова с выбранной областью
         """
-        # Use the shared area selector
+        # Использование общего селектора областей
         if not hasattr(self, 'area_selector'):
             from core.area_selector import AreaSelector
             self.area_selector = AreaSelector(self.root, area_callback)
@@ -276,32 +276,32 @@ class MainWindow:
         self.area_selector.select_area()
     
     def emergency_stop(self):
-        """Emergency stop triggered by ESC key"""
+        """Аварийная остановка по клавише ESC"""
         if self.current_running_tool:
-            self.update_status(f"🚨 EMERGENCY STOP - {self.current_running_tool} stopped!")
+            self.update_status(f"🚨 АВАРИЙНАЯ ОСТАНОВКА - {self.current_running_tool} остановлен!")
 
-            # Stop whichever tool is running
-            if self.current_running_tool == "Stellar System":
+            # Остановка whichever инструмент запущен
+            if self.current_running_tool == "Звездная Россыпь":
                 self.stellar_tab.emergency_stop()
-            elif self.current_running_tool == "Arrival Skill":
+            elif self.current_running_tool == "Крылья Силы":
                 self.arrival_tab.emergency_stop()
-            elif self.current_running_tool == "Collection Filler":
+            elif self.current_running_tool == "Заполнитель Коллекции":
                 self.collection_tab.emergency_stop()
-            elif self.current_running_tool == "Heils Clicker":
+            elif self.current_running_tool == "Heils Кликер":
                 self.heils_clicker_tab.emergency_stop()
 
             self.clear_running_tool()
 
-            # Bring window to front
+            # Вывод окна на передний план
             self.root.lift()
             self.root.attributes('-topmost', True)
             self.root.attributes('-topmost', False)
 
     def on_closing(self):
-        """Clean up when closing the application"""
-        keyboard.unhook_all()  # Remove all keyboard hooks
+        """Очистка при закрытии приложения"""
+        keyboard.unhook_all()  # Удаление всех хуков клавиатуры
         self.root.destroy()
 
     def run(self):
-        """Start the application"""
+        """Запуск приложения"""
         self.root.mainloop()

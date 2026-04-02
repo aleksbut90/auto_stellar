@@ -1,5 +1,5 @@
-# Arrival Skill tab UI
-# Ported from arrival_skill_ocr/ui.py
+# Вкладка навыка "Крылья Силы" UI
+# Портировано из arrival_skill_ocr/ui.py
 
 import tkinter as tk
 from tkinter import ttk, messagebox
@@ -8,148 +8,148 @@ from data.arrival_data import get_offensive_skills, get_defensive_skills, get_st
 from automation.arrival_automation import ArrivalAutomation
 from core.settings_manager import SettingsManager
 
-# Stats whose values cannot be reliably read (UI collision) and require grade-based detection
+# Статы, значения которых нельзя надежно прочитать (коллизия UI) и требуют обнаружения по_grade
 VALUE_COLLISION_STATS = {
     "Arrival Skill Cool Time decreased."
 }
 
-# Grade options to choose from when value reading is unreliable
+# Варианты рангов для выбора, когда чтение значений ненадежно
 GRADE_OPTIONS = ["Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6"]
 
 class ArrivalTab:
     def __init__(self, parent_frame, main_window):
-        """Initialize the Arrival Skill tab"""
+        """Инициализация вкладки Крылья Силы"""
         self.parent_frame = parent_frame
         self.main_window = main_window
 
-        # Settings manager for persistence (using unified settings.json)
+        # Менеджер настроек для сохранения (используя unified settings.json)
         self.settings = SettingsManager(tab_section="arrival")
 
-        # Automation components
+        # Компоненты автоматизации
         self.automation = ArrivalAutomation(
             main_window.game_connector,
             main_window.ocr_engine,
             main_window.update_status
         )
 
-        # UI state
+        # Состояние UI
         self.area = None
         self.grade_area = None
         self.apply_button_coords = None
         self.change_button_coords = None
-        self.offensive_stat_entries = []  # List of (stat_name, min_value_entry, frame) tuples
-        self.defensive_stat_entries = []  # List of (stat_name, min_value_entry, frame) tuples
+        self.offensive_stat_entries = []  # Список кортежей (stat_name, min_value_entry, frame)
+        self.defensive_stat_entries = []  # Список кортежей (stat_name, min_value_entry, frame)
         self.stats_area_status_var = None
         self.grade_area_status_var = None
 
-        # Create UI
+        # Создание UI
         self.create_ui()
         
-        # Load saved settings
+        # Загрузка сохраненных настроек
         self.load_saved_settings()
 
     def create_ui(self):
-        """Create the arrival skill UI"""
-        # Main frame with padding
+        """Создание UI вкладки Крылья Силы"""
+        # Главный фрейм с отступами
         main_frame = ttk.Frame(self.parent_frame, padding="10")
         main_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Content frame that can shrink (everything except buttons)
+        # Фрейм контента, который может сжиматься (все кроме кнопок)
         content_frame = ttk.Frame(main_frame)
         content_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Button coordinates section
-        coord_frame = ttk.LabelFrame(content_frame, text="Button Coordinates", padding="5")
+        # Секция координат кнопок
+        coord_frame = ttk.LabelFrame(content_frame, text="Координаты кнопок", padding="5")
         coord_frame.pack(fill=tk.X, pady=(0, 10))
 
-        # Apply button coordinates
+        # Координаты кнопки Применить
         apply_frame = ttk.Frame(coord_frame)
         apply_frame.pack(fill=tk.X, pady=2)
 
-        ttk.Label(apply_frame, text="Apply Button:").pack(side=tk.LEFT)
-        self.apply_coord_var = tk.StringVar(value="Not set")
+        ttk.Label(apply_frame, text="Кнопка Применить:").pack(side=tk.LEFT)
+        self.apply_coord_var = tk.StringVar(value="Не установлена")
         ttk.Label(apply_frame, textvariable=self.apply_coord_var, foreground="blue").pack(side=tk.LEFT, padx=(5, 10))
-        ttk.Button(apply_frame, text="Set Apply Button", command=self.set_apply_button).pack(side=tk.LEFT)
+        ttk.Button(apply_frame, text="Установить кнопку Применить", command=self.set_apply_button).pack(side=tk.LEFT)
 
-        # Change button coordinates
+        # Координаты кнопки Изменить
         change_frame = ttk.Frame(coord_frame)
         change_frame.pack(fill=tk.X, pady=2)
 
-        ttk.Label(change_frame, text="Change Button:").pack(side=tk.LEFT)
-        self.change_coord_var = tk.StringVar(value="Not set")
+        ttk.Label(change_frame, text="Кнопка Изменить:").pack(side=tk.LEFT)
+        self.change_coord_var = tk.StringVar(value="Не установлена")
         ttk.Label(change_frame, textvariable=self.change_coord_var, foreground="blue").pack(side=tk.LEFT, padx=(5, 10))
-        ttk.Button(change_frame, text="Set Change Button", command=self.set_change_button).pack(side=tk.LEFT)
+        ttk.Button(change_frame, text="Установить кнопку Изменить", command=self.set_change_button).pack(side=tk.LEFT)
 
-        # Area definition
-        area_frame = ttk.LabelFrame(content_frame, text="OCR Areas", padding="5")
+        # Секция определения областей
+        area_frame = ttk.LabelFrame(content_frame, text="Области OCR", padding="5")
         area_frame.pack(fill=tk.X, pady=(0, 10))
 
-        # Stats area row
+        # Строка области статов
         stats_area_row = ttk.Frame(area_frame)
         stats_area_row.pack(fill=tk.X, pady=2)
 
-        self.btn_define_area = ttk.Button(stats_area_row, text="Define OCR Area (Stats)", command=self.define_area)
+        self.btn_define_area = ttk.Button(stats_area_row, text="Определить область OCR (Статы)", command=self.define_area)
         self.btn_define_area.pack(side=tk.LEFT)
 
-        self.stats_area_status_var = ttk.Label(stats_area_row, text="❌ Not set", foreground="orange")
+        self.stats_area_status_var = ttk.Label(stats_area_row, text="❌ Не установлена", foreground="orange")
         self.stats_area_status_var.pack(side=tk.LEFT, padx=(10, 0))
 
-        # Grade area row
+        # Строка области ранга
         grade_area_row = ttk.Frame(area_frame)
         grade_area_row.pack(fill=tk.X, pady=2)
 
-        self.btn_define_grade_area = ttk.Button(grade_area_row, text="Define OCR Area (Grade)", command=self.define_grade_area)
+        self.btn_define_grade_area = ttk.Button(grade_area_row, text="Определить область OCR (Ранг)", command=self.define_grade_area)
         self.btn_define_grade_area.pack(side=tk.LEFT)
 
-        # Info button for Grade OCR area
+        # Кнопка информации для области OCR ранга
         info_button = ttk.Button(grade_area_row, text="ℹ️", width=3, command=self.show_grade_area_info)
         info_button.pack(side=tk.LEFT, padx=(5, 0))
 
-        self.grade_area_status_var = ttk.Label(grade_area_row, text="Optional: Not set (Required for 'Arrival Skill Cool Time Decreased')", foreground="gray")
+        self.grade_area_status_var = ttk.Label(grade_area_row, text="Опционально: Не установлена (Требуется для 'Перезарядка навыка Крыльев Силы')", foreground="gray")
         self.grade_area_status_var.pack(side=tk.LEFT, padx=(10, 0))
 
-        # Stat selection section
-        stats_frame = ttk.LabelFrame(content_frame, text="Desired Stats", padding="5")
+        # Секция выбора статов
+        stats_frame = ttk.LabelFrame(content_frame, text="Желаемые статы", padding="5")
         stats_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
         
-        # Logic selection (AND/OR between offensive and defensive)
+        # Выбор логики (AND/OR между атакующими и защитными)
         logic_frame = ttk.Frame(stats_frame)
         logic_frame.pack(fill=tk.X, pady=(0, 5))
-        ttk.Label(logic_frame, text="Logic between Offensive and Defensive:").pack(anchor=tk.W, pady=(0, 3))
-        self.logic_var = tk.StringVar(value="OR")  # Default to OR
-        ttk.Radiobutton(logic_frame, text="OR (either category can match)", variable=self.logic_var, value="OR").pack(anchor=tk.W, padx=(20, 0))
-        ttk.Radiobutton(logic_frame, text="AND (both categories must match)", variable=self.logic_var, value="AND").pack(anchor=tk.W, padx=(20, 0))
+        ttk.Label(logic_frame, text="Логика между Атакующими и Защитными:").pack(anchor=tk.W, pady=(0, 3))
+        self.logic_var = tk.StringVar(value="OR")  # По умолчанию OR
+        ttk.Radiobutton(logic_frame, text="OR (может совпадать любая категория)", variable=self.logic_var, value="OR").pack(anchor=tk.W, padx=(20, 0))
+        ttk.Radiobutton(logic_frame, text="AND (должны совпадать обе категории)", variable=self.logic_var, value="AND").pack(anchor=tk.W, padx=(20, 0))
 
-        # Offensive stats section
-        off_stats_frame = ttk.LabelFrame(stats_frame, text="Offensive Stats (OR Logic)", padding="5")
+        # Секция атакующих статов
+        off_stats_frame = ttk.LabelFrame(stats_frame, text="Атакующие статы (логика OR)", padding="5")
         off_stats_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 5))
 
-        # Add offensive stat button and dropdown
+        # Фрейм добавления атакующего стата и выпадающего списка
         add_off_stat_frame = ttk.Frame(off_stats_frame)
         add_off_stat_frame.pack(fill=tk.X, pady=(0, 5))
         
-        ttk.Label(add_off_stat_frame, text="Select stat:").pack(side=tk.LEFT)
-        off_skills = get_offensive_skills() + ["Custom"]
+        ttk.Label(add_off_stat_frame, text="Выберите стат:").pack(side=tk.LEFT)
+        off_skills = get_offensive_skills() + ["Свой"]
         self.combo_off_stat_selector = ttk.Combobox(add_off_stat_frame, values=off_skills, state="readonly", width=20)
         self.combo_off_stat_selector.pack(side=tk.LEFT, padx=(5, 5))
         self.combo_off_stat_selector.bind("<<ComboboxSelected>>", self.on_off_stat_selected)
-        ttk.Button(add_off_stat_frame, text="Add Stat", command=self.add_offensive_stat).pack(side=tk.LEFT)
+        ttk.Button(add_off_stat_frame, text="Добавить стат", command=self.add_offensive_stat).pack(side=tk.LEFT)
         
-        # Custom offensive stat input fields (hidden by default)
+        # Поля ввода своего атакующего стата (скрыты по умолчанию)
         self.custom_off_frame = ttk.Frame(add_off_stat_frame)
-        ttk.Label(self.custom_off_frame, text="Custom Name:").pack(side=tk.LEFT)
+        ttk.Label(self.custom_off_frame, text="Свое название:").pack(side=tk.LEFT)
         self.custom_off_name_entry = ttk.Entry(self.custom_off_frame, width=15)
         self.custom_off_name_entry.pack(side=tk.LEFT, padx=(5, 5))
-        ttk.Label(self.custom_off_frame, text="Min Value:").pack(side=tk.LEFT)
+        ttk.Label(self.custom_off_frame, text="Мин. значение:").pack(side=tk.LEFT)
         self.custom_off_value_entry = ttk.Entry(self.custom_off_frame, width=8)
         self.custom_off_value_entry.pack(side=tk.LEFT, padx=(5, 0))
-        self.custom_off_frame.pack_forget()  # Hide initially
+        self.custom_off_frame.pack_forget()  # Скрыть изначально
         
-        # Container for offensive stat entries with scrollbar
+        # Контейнер для записей атакующих статов с прокруткой
         off_stats_container_frame = ttk.Frame(off_stats_frame)
         off_stats_container_frame.pack(fill=tk.BOTH, expand=True)
         
-        # Create canvas and scrollbar for scrollable offensive stat list
+        # Создание canvas и scrollbar для прокручиваемого списка атакующих статов
         off_canvas = tk.Canvas(off_stats_container_frame, height=100)
         off_scrollbar = ttk.Scrollbar(off_stats_container_frame, orient="vertical", command=off_canvas.yview)
         self.off_stats_scrollable_frame = ttk.Frame(off_canvas)
@@ -165,36 +165,36 @@ class ArrivalTab:
         off_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         off_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        # Defensive stats section
-        def_stats_frame = ttk.LabelFrame(stats_frame, text="Defensive Stats (OR Logic)", padding="5")
+        # Секция защитных статов
+        def_stats_frame = ttk.LabelFrame(stats_frame, text="Защитные статы (логика OR)", padding="5")
         def_stats_frame.pack(fill=tk.BOTH, expand=True, pady=(5, 0))
 
-        # Add defensive stat button and dropdown
+        # Фрейм добавления защитного стата и выпадающего списка
         add_def_stat_frame = ttk.Frame(def_stats_frame)
         add_def_stat_frame.pack(fill=tk.X, pady=(0, 5))
         
-        ttk.Label(add_def_stat_frame, text="Select stat:").pack(side=tk.LEFT)
-        def_skills = get_defensive_skills() + ["Custom"]
+        ttk.Label(add_def_stat_frame, text="Выберите стат:").pack(side=tk.LEFT)
+        def_skills = get_defensive_skills() + ["Свой"]
         self.combo_def_stat_selector = ttk.Combobox(add_def_stat_frame, values=def_skills, state="readonly", width=20)
         self.combo_def_stat_selector.pack(side=tk.LEFT, padx=(5, 5))
         self.combo_def_stat_selector.bind("<<ComboboxSelected>>", self.on_def_stat_selected)
-        ttk.Button(add_def_stat_frame, text="Add Stat", command=self.add_defensive_stat).pack(side=tk.LEFT)
+        ttk.Button(add_def_stat_frame, text="Добавить стат", command=self.add_defensive_stat).pack(side=tk.LEFT)
         
-        # Custom defensive stat input fields (hidden by default)
+        # Поля ввода своего защитного стата (скрыты по умолчанию)
         self.custom_def_frame = ttk.Frame(add_def_stat_frame)
-        ttk.Label(self.custom_def_frame, text="Custom Name:").pack(side=tk.LEFT)
+        ttk.Label(self.custom_def_frame, text="Свое название:").pack(side=tk.LEFT)
         self.custom_def_name_entry = ttk.Entry(self.custom_def_frame, width=15)
         self.custom_def_name_entry.pack(side=tk.LEFT, padx=(5, 5))
-        ttk.Label(self.custom_def_frame, text="Min Value:").pack(side=tk.LEFT)
+        ttk.Label(self.custom_def_frame, text="Мин. значение:").pack(side=tk.LEFT)
         self.custom_def_value_entry = ttk.Entry(self.custom_def_frame, width=8)
         self.custom_def_value_entry.pack(side=tk.LEFT, padx=(5, 0))
-        self.custom_def_frame.pack_forget()  # Hide initially
+        self.custom_def_frame.pack_forget()  # Скрыть изначально
         
-        # Container for defensive stat entries with scrollbar
+        # Контейнер для записей защитных статов с прокруткой
         def_stats_container_frame = ttk.Frame(def_stats_frame)
         def_stats_container_frame.pack(fill=tk.BOTH, expand=True)
         
-        # Create canvas and scrollbar for scrollable defensive stat list
+        # Создание canvas и scrollbar для прокручиваемого списка защитных статов
         def_canvas = tk.Canvas(def_stats_container_frame, height=100)
         def_scrollbar = ttk.Scrollbar(def_stats_container_frame, orient="vertical", command=def_canvas.yview)
         self.def_stats_scrollable_frame = ttk.Frame(def_canvas)
