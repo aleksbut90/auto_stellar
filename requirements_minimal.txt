@@ -5,7 +5,7 @@ keyboard==0.13.5
 mouse==0.7.1
 pywin32>=306
 opencv-python==4.8.1.78
-numpy==1.26.2
+numpy>=1.26.2
 pyinstaller==6.4.0
 pyautogui==0.9.54
 pydirectinput==1.0.4
