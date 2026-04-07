@@ -43,7 +43,8 @@ class OCREngine:
             if image is None:
                 return ""
 
-            text = pytesseract.image_to_string(image)
+            # Specify Russian and English languages for OCR
+            text = pytesseract.image_to_string(image, lang='rus+eng')
             return text
         except Exception as e:
             self.update_status(f"OCR error: {str(e)}")
