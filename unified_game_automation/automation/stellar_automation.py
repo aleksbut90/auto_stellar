@@ -143,12 +143,13 @@ class StellarAutomation(BaseAutomation):
 
             if len(numbers_found) != 1:
                 self.wrong_read_counter += 1
-                if self.wrong_read_counter > 2:
+                if self.wrong_read_counter > 5:
                     self.update_status("Wrong number count - check area definition")
                     self.stop()
                     self.loop_in_progress = False
                     return
                 else:
+                    self.update_status(f"OCR read error (attempt {self.wrong_read_counter}/5): found {len(numbers_found)} numbers")
                     self.loop_in_progress = False
                     # Schedule next attempt with longer delay
                     threading.Timer(0.7, self.loop_ocr).start()
