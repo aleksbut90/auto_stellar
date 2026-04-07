@@ -118,6 +118,7 @@ class StellarAutomation(BaseAutomation):
     def stop(self):
         """Stop the stellar automation"""
         self.running = False
+        self.stop_event.set()
         self.update_status("Stellar automation stopped")
         if self.stat_counter:
             self.show_stats_summary()
@@ -134,6 +135,12 @@ class StellarAutomation(BaseAutomation):
 
     def loop_ocr(self):
         """Main OCR loop - extracted from main.py"""
+        # Check stop event first
+        if self.stop_event.is_set():
+            self.update_status("[STOP] Stop event detected")
+            self.loop_in_progress = False
+            return
+            
         if self.loop_in_progress:
             return
 
@@ -148,7 +155,12 @@ class StellarAutomation(BaseAutomation):
             
             # Wait for visual effects to appear, then click to close them
             self.update_status(f"[DEBUG] Waiting {self.effect_delay_ms/1000}s for effects")
-            time.sleep(self.effect_delay_ms / 1000.0)
+            
+            # Check stop event during delay
+            if self.stop_event.wait(timeout=self.effect_delay_ms / 1000.0):
+                self.update_status("[STOP] Stopped during effect delay")
+                self.loop_in_progress = False
+                return
 
             # Click imprint button (which becomes "close" button) to clear visual effects
             self.update_status(f"[DEBUG] Clicking imprint button at {self.imprint_button_coords}")

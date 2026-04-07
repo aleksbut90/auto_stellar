@@ -43,8 +43,29 @@ class OCREngine:
             if image is None:
                 return ""
 
-            # Specify Russian and English languages for OCR
-            text = pytesseract.image_to_string(image, lang='rus+eng')
+            # Convert to grayscale and enhance contrast for better Cyrillic recognition
+            import cv2
+            import numpy as np
+            
+            # Convert PIL to OpenCV format
+            img_array = np.array(image)
+            if len(img_array.shape) == 3:
+                gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+            else:
+                gray = img_array
+            
+            # Apply adaptive thresholding for better contrast
+            enhanced = cv2.adaptiveThreshold(
+                gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
+            )
+            
+            # Convert back to PIL
+            from PIL import Image
+            enhanced_image = Image.fromarray(enhanced)
+            
+            # Specify Russian and English languages for OCR with explicit config
+            config = '--oem 3 --psm 6 -l rus+eng'
+            text = pytesseract.image_to_string(enhanced_image, config=config)
             return text
         except Exception as e:
             self.update_status(f"OCR error: {str(e)}")
