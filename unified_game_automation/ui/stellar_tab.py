@@ -36,8 +36,8 @@ class StellarTab:
 
     def create_ui(self):
         """Создание UI вкладки Звездная Россыпь"""
-        # Главный фрейм с отступами
-        main_frame = ttk.Frame(self.parent_frame, padding="10")
+        # Главный фрейм с увеличенными отступами
+        main_frame = ttk.Frame(self.parent_frame, padding="15")
         main_frame.pack(fill=tk.BOTH, expand=True)
 
         # Фрейм контента, который может сжиматься (все кроме кнопок)
@@ -45,43 +45,43 @@ class StellarTab:
         content_frame.pack(fill=tk.BOTH, expand=True)
 
         # Секция координат кнопок
-        coord_frame = ttk.LabelFrame(content_frame, text="Координаты кнопок", padding="5")
-        coord_frame.pack(fill=tk.X, pady=(0, 10))
+        coord_frame = ttk.LabelFrame(content_frame, text="Координаты кнопок", padding="10")
+        coord_frame.pack(fill=tk.X, pady=(0, 15))
 
         # Координаты кнопки Запечатлеть
         imprint_frame = ttk.Frame(coord_frame)
-        imprint_frame.pack(fill=tk.X, pady=2)
+        imprint_frame.pack(fill=tk.X, pady=5)
 
-        ttk.Label(imprint_frame, text="Кнопка Запечатлеть:").pack(side=tk.LEFT)
+        ttk.Label(imprint_frame, text="Кнопка Запечатлеть:", font=self.main_window.default_font).pack(side=tk.LEFT)
         self.imprint_coord_var = tk.StringVar(value="Не установлена")
-        ttk.Label(imprint_frame, textvariable=self.imprint_coord_var, foreground="blue").pack(side=tk.LEFT, padx=(5, 0))
+        ttk.Label(imprint_frame, textvariable=self.imprint_coord_var, foreground="blue", font=self.main_window.default_font).pack(side=tk.LEFT, padx=(5, 0))
         ttk.Button(imprint_frame, text="Установить кнопку Запечатлеть", command=self.set_imprint_button).pack(side=tk.RIGHT)
 
         # Секция выбора статов
-        option_frame = ttk.LabelFrame(content_frame, text="Конфигурация статов (логика OR)", padding="5")
-        option_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+        option_frame = ttk.LabelFrame(content_frame, text="Конфигурация статов (логика OR)", padding="10")
+        option_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
 
         # Кнопка добавления стата и выпадающий список
         add_stat_frame = ttk.Frame(option_frame)
-        add_stat_frame.pack(fill=tk.X, pady=(0, 5))
+        add_stat_frame.pack(fill=tk.X, pady=(0, 10))
         
-        ttk.Label(add_stat_frame, text="Выберите стат:").pack(side=tk.LEFT)
+        ttk.Label(add_stat_frame, text="Выберите стат:", font=self.main_window.default_font).pack(side=tk.LEFT)
         stellar_options = get_stellar_options() + ["Свой"]
-        self.combo_stat_selector = ttk.Combobox(add_stat_frame, values=stellar_options, state="readonly", width=20)
-        self.combo_stat_selector.pack(side=tk.LEFT, padx=(5, 5))
+        self.combo_stat_selector = ttk.Combobox(add_stat_frame, values=stellar_options, state="readonly", width=25)
+        self.combo_stat_selector.pack(side=tk.LEFT, padx=(5, 10))
         self.combo_stat_selector.bind("<<ComboboxSelected>>", self.on_stat_selected)
         ttk.Button(add_stat_frame, text="Добавить стат", command=self.add_stat).pack(side=tk.LEFT)
         
         # Поля ввода своего стата (скрыты по умолчанию)
         self.custom_frame = ttk.Frame(add_stat_frame)
-        self.custom_frame.pack(fill=tk.X, pady=(5, 0))
+        self.custom_frame.pack(fill=tk.X, pady=(10, 0))
         
-        ttk.Label(self.custom_frame, text="Свое название:").pack(side=tk.LEFT)
-        self.custom_name_entry = ttk.Entry(self.custom_frame, width=15)
-        self.custom_name_entry.pack(side=tk.LEFT, padx=(5, 5))
+        ttk.Label(self.custom_frame, text="Свое название:", font=self.main_window.default_font).pack(side=tk.LEFT)
+        self.custom_name_entry = ttk.Entry(self.custom_frame, width=20)
+        self.custom_name_entry.pack(side=tk.LEFT, padx=(5, 10))
         
-        ttk.Label(self.custom_frame, text="Мин. значение:").pack(side=tk.LEFT)
-        self.custom_value_entry = ttk.Entry(self.custom_frame, width=8)
+        ttk.Label(self.custom_frame, text="Мин. значение:", font=self.main_window.default_font).pack(side=tk.LEFT)
+        self.custom_value_entry = ttk.Entry(self.custom_frame, width=10)
         self.custom_value_entry.pack(side=tk.LEFT, padx=(5, 0))
         
         self.custom_frame.pack_forget()  # Скрыть изначально
@@ -92,7 +92,7 @@ class StellarTab:
         self.stats_container_frame.pack(fill=tk.BOTH, expand=True)
         
         # Создание canvas и scrollbar для прокручиваемого списка статов
-        canvas = tk.Canvas(self.stats_container_frame, height=150)
+        canvas = tk.Canvas(self.stats_container_frame, height=180)
         scrollbar = ttk.Scrollbar(self.stats_container_frame, orient="vertical", command=canvas.yview)
         self.stats_scrollable_frame = ttk.Frame(canvas)
         
@@ -109,27 +109,27 @@ class StellarTab:
         
 
         # Секция настроек визуального эффекта
-        effect_frame = ttk.LabelFrame(content_frame, text="Настройки визуального эффекта", padding="5")
-        effect_frame.pack(fill=tk.X, pady=(0, 10))
+        effect_frame = ttk.LabelFrame(content_frame, text="Настройки визуального эффекта", padding="10")
+        effect_frame.pack(fill=tk.X, pady=(0, 15))
 
 
         # Настройка задержки
         delay_frame = ttk.Frame(effect_frame)
-        delay_frame.pack(fill=tk.X, pady=2)
+        delay_frame.pack(fill=tk.X, pady=5)
 
-        ttk.Label(delay_frame, text="Задержка очистки эффекта:").pack(side=tk.LEFT)
-        self.entry_effect_delay = ttk.Entry(delay_frame, width=8)
+        ttk.Label(delay_frame, text="Задержка очистки эффекта:", font=self.main_window.default_font).pack(side=tk.LEFT)
+        self.entry_effect_delay = ttk.Entry(delay_frame, width=10)
         self.entry_effect_delay.pack(side=tk.LEFT, padx=(5, 0))
         self.entry_effect_delay.insert(0, "1000")  # По умолчанию 1000мс = 1 секунда
         self.entry_effect_delay.bind("<KeyRelease>", lambda e: self.save_effect_delay())
-        ttk.Label(delay_frame, text="мс", font=("Arial", 8), foreground="gray").pack(side=tk.LEFT, padx=(5, 0))
+        ttk.Label(delay_frame, text="мс", font=self.main_window.default_font, foreground="gray").pack(side=tk.LEFT, padx=(5, 0))
 
         # Определение области
         area_frame = ttk.Frame(content_frame)
-        area_frame.pack(fill=tk.X, pady=(0, 10))
+        area_frame.pack(fill=tk.X, pady=(0, 15))
 
         self.btn_define_area = ttk.Button(area_frame, text="Определить область", command=self.define_area)
-        self.btn_define_area.pack()
+        self.btn_define_area.pack(pady=5)
 
     def add_stat(self):
         """Добавление стата с минимальным значением в список"""
@@ -160,15 +160,15 @@ class StellarTab:
         
         # Создание фрейма для этого стата
         stat_frame = ttk.Frame(self.stats_scrollable_frame)
-        stat_frame.pack(fill=tk.X, pady=2)
+        stat_frame.pack(fill=tk.X, pady=5)
         
         # Метка названия стата
-        ttk.Label(stat_frame, text=stat_name, width=20).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Label(stat_frame, text=stat_name, width=25, font=self.main_window.default_font).pack(side=tk.LEFT, padx=(0, 10))
         
         # Поле ввода мин. значения
-        ttk.Label(stat_frame, text="Мин:").pack(side=tk.LEFT)
-        min_value_entry = ttk.Entry(stat_frame, width=8)
-        min_value_entry.pack(side=tk.LEFT, padx=(2, 5))
+        ttk.Label(stat_frame, text="Мин:", font=self.main_window.default_font).pack(side=tk.LEFT)
+        min_value_entry = ttk.Entry(stat_frame, width=10)
+        min_value_entry.pack(side=tk.LEFT, padx=(5, 10))
         if min_value:  # Предзаполнение если свой стат имел значение
             min_value_entry.insert(0, min_value)
         
@@ -335,15 +335,15 @@ class StellarTab:
             if stat_name:
                 # Create frame for this stat entry
                 stat_frame = ttk.Frame(self.stats_scrollable_frame)
-                stat_frame.pack(fill=tk.X, pady=2)
+                stat_frame.pack(fill=tk.X, pady=5)
                 
                 # Stat name label
-                ttk.Label(stat_frame, text=stat_name, width=20).pack(side=tk.LEFT, padx=(0, 5))
+                ttk.Label(stat_frame, text=stat_name, width=25, font=self.main_window.default_font).pack(side=tk.LEFT, padx=(0, 10))
                 
                 # Min value entry
-                ttk.Label(stat_frame, text="Min:").pack(side=tk.LEFT)
-                min_value_entry = ttk.Entry(stat_frame, width=8)
-                min_value_entry.pack(side=tk.LEFT, padx=(2, 5))
+                ttk.Label(stat_frame, text="Min:", font=self.main_window.default_font).pack(side=tk.LEFT)
+                min_value_entry = ttk.Entry(stat_frame, width=10)
+                min_value_entry.pack(side=tk.LEFT, padx=(5, 10))
                 if min_value:
                     min_value_entry.insert(0, min_value)
                 

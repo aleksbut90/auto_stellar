@@ -20,8 +20,12 @@ class MainWindow:
         """Инициализация главного окна с вкладками"""
         self.root = tk.Tk()
         self.root.title("Автоматизация Звездной Россыпи и Крыльев Силы")
-        self.root.geometry("700x800")
+        self.root.geometry("800x900")
         self.root.attributes("-topmost", True)
+        
+        # Настройка масштабируемости шрифтов
+        self.default_font = ("Arial", 10)
+        self.heading_font = ("Arial", 11, "bold")
 
         # Отслеживание текущего запущенного инструмента (взаимное исключение)
         self.current_running_tool = None
@@ -44,8 +48,8 @@ class MainWindow:
 
     def create_ui(self):
         """Создание главного UI с вкладками"""
-        # Главный фрейм
-        main_frame = ttk.Frame(self.root, padding="10")
+        # Главный фрейм с увеличенными отступами
+        main_frame = ttk.Frame(self.root, padding="15")
         main_frame.pack(fill=tk.BOTH, expand=True)
 
         # Авто-подключение к игре и отображение статуса
@@ -53,24 +57,24 @@ class MainWindow:
 
         # Информация об аварийной остановке - размещена сверху для лучшей видимости
         emergency_frame = ttk.Frame(main_frame)
-        emergency_frame.pack(fill=tk.X, pady=(0, 10))
+        emergency_frame.pack(fill=tk.X, pady=(0, 15))
         emergency_label = ttk.Label(emergency_frame, text="Аварийная остановка: ESC",
-                                   foreground="red", font=("Arial", 9, "bold"))
+                                   foreground="red", font=self.heading_font)
         emergency_label.pack(anchor=tk.W)
 
         # Универсальные кнопки Старт/Стоп
         control_frame = ttk.Frame(main_frame)
-        control_frame.pack(fill=tk.X, pady=(0, 10))
+        control_frame.pack(fill=tk.X, pady=(0, 15))
         
         self.btn_start = ttk.Button(control_frame, text="Старт", command=self.unified_start, state=tk.DISABLED)
-        self.btn_start.pack(side=tk.LEFT, padx=(0, 5))
+        self.btn_start.pack(side=tk.LEFT, padx=(0, 10))
         
         self.btn_stop = ttk.Button(control_frame, text="Стоп", command=self.unified_stop, state=tk.DISABLED)
         self.btn_stop.pack(side=tk.LEFT)
 
         # Создание книги вкладок
         self.notebook = ttk.Notebook(main_frame)
-        self.notebook.pack(fill=tk.BOTH, expand=True)
+        self.notebook.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
         
         # Привязка события смены вкладки для остановки автоматизации при переключении
         self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_changed)
