@@ -3,11 +3,11 @@
 
 # Stellar system options
 STELLAR_OPTIONS = [
-    "PVE Penetration",
-    "PVE Critical DMG",
-    "All Attack UP",
-    "Penetration",
-    "Critical DMG.",
+    "PVE Пробивная способность",
+    "PVE Крит. урон",
+    "Усиление всех атак",
+    "Пробивная способность",
+    "Крит. урон",
     "Ignore Accuracy",
     "Defense"
 ]
