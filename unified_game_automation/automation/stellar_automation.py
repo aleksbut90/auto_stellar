@@ -60,6 +60,9 @@ class StellarAutomation(BaseAutomation):
             self.update_status("Set Imprint button first")
             return False
 
+        # Reset stop event for new run
+        self.stop_event.clear()
+        
         # Connect to game if not already connected
         if not self.game_connector.is_connected():
             if not self.game_connector.connect_to_game():

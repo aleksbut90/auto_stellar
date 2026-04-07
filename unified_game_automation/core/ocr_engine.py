@@ -66,10 +66,79 @@ class OCREngine:
             # Specify Russian and English languages for OCR with explicit config
             config = '--oem 3 --psm 6 -l rus+eng'
             text = pytesseract.image_to_string(enhanced_image, config=config)
+            
+            # Post-process: fix common Cyrillic/Latin confusion patterns
+            text = self._fix_cyrillic_text(text)
+            
             return text
         except Exception as e:
             self.update_status(f"OCR error: {str(e)}")
             return ""
+    
+    def _fix_cyrillic_text(self, text):
+        """Fix common Cyrillic/Latin character confusion in OCR output"""
+        # Common substitutions for misrecognized Cyrillic characters
+        replacements = {
+            # Latin -> Cyrillic (when context suggests Cyrillic)
+            'c': 'с',  # Latin c -> Cyrillic с (es)
+            'C': 'С',  # Latin C -> Cyrillic С 
+            'a': 'а',  # Latin a -> Cyrillic а 
+            'A': 'А',  # Latin A -> Cyrillic А
+            'e': 'е',  # Latin e -> Cyrillic е (ye)
+            'E': 'Е',  # Latin E -> Cyrillic Е
+            'o': 'о',  # Latin o -> Cyrillic о 
+            'O': 'О',  # Latin O -> Cyrillic О
+            'p': 'р',  # Latin p -> Cyrillic р (er) - careful with this one
+            'P': 'Р',  # Latin P -> Cyrillic Р
+            'x': 'х',  # Latin x -> Cyrillic х (kha)
+            'X': 'Х',  # Latin X -> Cyrillic Х
+            'y': 'у',  # Latin y -> Cyrillic у 
+            'Y': 'У',  # Latin Y -> Cyrillic У
+            'B': 'В',  # Latin B -> Cyrillic В (ve)
+            'H': 'Н',  # Latin H -> Cyrillic Н (en)
+            'K': 'К',  # Latin K -> Cyrillic К
+            'M': 'М',  # Latin M -> Cyrillic М
+            'T': 'Т',  # Latin T -> Cyrillic Т
+            'S': 'Ѕ',  # Latin S -> Cyrillic Ѕ (dze) - rare, but possible
+            'I': 'І',  # Latin I -> Cyrillic І (i) - Ukrainian/Old Russian
+            'j': 'ј',  # Latin j -> Cyrillic ј (je) - Serbian/Macedonian
+            'q': 'қ',  # Latin q -> Cyrillic қ (ka) - Kazakh etc.
+            'w': 'ў',  # Latin w -> Cyrillic ў (short u) - Belarusian/Uzbek
+            'z': 'з',  # Latin z -> Cyrillic з (ze)
+            'Z': 'З',  # Latin Z -> Cyrillic З
+            
+            # Specific game terms - common misrecognitions
+            'Seesqnaa': 'Звёздная',
+            'Ssesqa': 'Звёздн',
+            'spesqnaa': 'звёздная',
+            'spesqhaa': 'звёздная',
+            'cuna': 'сила',
+            'cuna+': 'сила +',
+            'Cease': 'Сила',
+            'Canbe': 'Сила',
+            'cape': 'силе',
+            'Tope': 'Гнев',
+            'Tes': 'Гнев',
+            'Snes': 'Гнев',
+            'cnmkehne': 'снижение',
+            'chinkenney': 'снижение',
+            'ypoha': 'урона',
+            'ypona': 'урона',
+            'virhop': 'Крит.',
+            'VlrHop': 'Крит.',
+            'abcontotholt': 'абсолютной',
+            'toukocth': 'точности',
+            'wareysopora': 'шансе уворота',
+            'ycropora': 'уворота',
+            'mycrora': 'Мастерства',
+            'sadsehne': 'Защиты',
+        }
+        
+        result = text
+        for wrong, correct in replacements.items():
+            result = result.replace(wrong, correct)
+        
+        return result
 
     def parse_stellar_text(self, text):
         """
