@@ -178,9 +178,23 @@ class StellarAutomation(BaseAutomation):
             
             self.iteration_count += 1
 
-            # Check for exactly one number (stellar format validation)
-            numbers_found = self.ocr_engine.find_numbers(text)
-            self.update_status(f"[DEBUG] Numbers found: {numbers_found} (count: {len(numbers_found)})")
+            # Extract stat value (number after '+') - this is the actual roll value
+            # Format expected: "Stat Name +Value" or "Stat Name + Value"
+            stat_value_match = re.search(r'\+\s*(\d+)', text)
+            if stat_value_match:
+                numbers_found = [stat_value_match.group(1)]
+            else:
+                # Fallback: find all numbers but filter out likely noise
+                # In stellar system, the main stat value is usually the last number or the one after '+'
+                all_numbers = re.findall(r'\d+', text)
+                # Filter: keep only numbers that look like stat values (typically > 0 and not part of common prefixes)
+                # For now, if no '+' found, we take the last number as the stat value (common pattern)
+                if all_numbers:
+                    numbers_found = [all_numbers[-1]]
+                else:
+                    numbers_found = []
+            
+            self.update_status(f"[DEBUG] Extracted stat value(s): {numbers_found} (count: {len(numbers_found)})")
 
             if len(numbers_found) != 1:
                 self.wrong_read_counter += 1
