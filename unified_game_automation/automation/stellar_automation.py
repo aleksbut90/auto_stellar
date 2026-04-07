@@ -4,6 +4,8 @@
 import time
 import re
 import threading
+import os
+from datetime import datetime
 from tkinter import messagebox
 from data.stellar_data import get_penetration_exceptions
 from automation.base_automation import BaseAutomation
@@ -27,6 +29,9 @@ class StellarAutomation(BaseAutomation):
         # Stat tracking
         self.stat_counter = {}
         self.iteration_count = 0
+        
+        # Log file path
+        self.log_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "log.txt")
 
     def set_area(self, area):
         """Set the OCR area"""
@@ -81,8 +86,32 @@ class StellarAutomation(BaseAutomation):
         threading.Thread(target=self._start_automation_loop, daemon=True).start()
         return True
 
+    def update_status(self, message):
+        """Update status with logging to file"""
+        timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
+        log_message = f"[{timestamp}] {message}"
+        
+        # Write to log file
+        try:
+            with open(self.log_file_path, "a", encoding="utf-8") as f:
+                f.write(log_message + "\n")
+        except Exception:
+            pass
+        
+        # Call parent status callback if exists
+        if self.status_callback:
+            self.status_callback(log_message)
+
     def _start_automation_loop(self):
         """Start the automation loop with initial delay"""
+        # Clear log file at start
+        try:
+            with open(self.log_file_path, "w", encoding="utf-8") as f:
+                f.write(f"=== Stellar Automation Started at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ===\n")
+        except Exception:
+            pass
+        
+        self.update_status("[INFO] Starting automation loop...")
         time.sleep(3)  # Initial delay
         self.loop_ocr()
 
