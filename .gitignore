@@ -4,98 +4,47 @@ __pycache__/
 *.o
 *.obj
 *.out
-*.so
 *.dll
-*.exe
-*.class
+*.so
 *.a
-*.lib
-*.dylib
-*.jar
-*.war
-*.zip
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.gz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
+*.class
 
 # Dependencies
 .venv/
 venv/
 .env
 .env.local
-.env.*
-node_modules/
-target/
-.gradle/
-.mypy_cache/
-.pytest_cache/
-.coverage
-coverage/
-htmlcov/
-dist/
-build/
-julia-*/
-zig*/
+*.env.*
 
 # Logs and temp files
 *.log
 *.tmp
 *.swp
 *.swo
-*.bak
-*.~
-*~
 
-# Editors and IDEs
+# Editors
 .vscode/
 .idea/
-*.swp
-*.swo
+*.pyc
+__pycache__/
+
+# Distribution and build directories
+dist/
+build/
+target/
+.gradle/
+
+# Coverage reports
+.coverage
+coverage/
+htmlcov/
+
+# Python specific
+*.pyc
+__pycache__/
+.mypy_cache/
+.pytest_cache/
 
 # System files
 .DS_Store
 Thumbs.db
-.hg/
-.svn/
-.git/
-
-# Distribution / packaging
-*.egg-info/
-MANIFEST
-.pytest_cache/
-.tox/
-nox/
-site-packages/
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Testing
-.coverage
-htmlcov/
-.coverage.*
-.nyc_output
-istanbul.out
-coverage-final.json
-
-# Documentation
-docs/_build/
-
-# CI/CD
-.semaphore/
-.github/
-.gitlab/
