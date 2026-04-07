@@ -30,8 +30,8 @@ class StellarAutomation(BaseAutomation):
         self.stat_counter = {}
         self.iteration_count = 0
         
-        # Log file path
-        self.log_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "log.txt")
+        # Log file path - use absolute path in user's home directory for easy access
+        self.log_file_path = os.path.join(os.path.expanduser("~"), "stellar_automation_log.txt")
 
     def set_area(self, area):
         """Set the OCR area"""
