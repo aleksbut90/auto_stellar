@@ -3,16 +3,13 @@
 
 # Stellar system options
 STELLAR_OPTIONS = [
-    "PVE Penetration",
-    "PVE Critical DMG",
-    "All Attack UP",
-    "Penetration",
-    "Critical DMG.",
-    "Ignore Accuracy",
-    "Defense"
+    "усиление всех атак",
+    "пробивная способность",
+    "крит урон",
+    "Пустота"
 ]
 
-# Exceptions for penetration option (from main.py)
+# Exceptions for penetration option (from main.py)так
 PENETRATION_EXCEPTIONS = [
     "ignore",
     "cancel"

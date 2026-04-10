@@ -1,52 +1,77 @@
 # Stellar system automation logic
-# Extracted from main.py
+# Fully rewritten to remove Timer and make STOP work reliably
 
 import time
 import re
 import threading
+import os
+import sys
+from datetime import datetime
 from tkinter import messagebox
 from data.stellar_data import get_penetration_exceptions
 from automation.base_automation import BaseAutomation
 
+
 class StellarAutomation(BaseAutomation):
     def __init__(self, game_connector, ocr_engine, status_callback=None):
-        """Initialize stellar system automation"""
         super().__init__(game_connector, ocr_engine, status_callback)
 
-        # Automation state
+        self.running = False
+        self.stop_event = threading.Event()
+
         self.loop_in_progress = False
         self.wrong_read_counter = 0
 
-        # Configuration
         self.area = None
         self.imprint_button_coords = None
-        self.stat_config = {}  # Dictionary: {stat_name: min_value}
-        self.delay_ms = 800  # Simplified - removed ping dependency
-        self.effect_delay_ms = 1000  # Default 1 second for visual effect clearing
-        
-        # Stat tracking
+        self.stat_config = {}
+        self.delay_ms = 800
+        self.effect_delay_ms = 1000
+
         self.stat_counter = {}
         self.iteration_count = 0
 
+        # Лог рядом с исполняемым файлом (работает и из exe и из исходников)
+        if getattr(sys, 'frozen', False):
+            # Запущено из PyInstaller exe
+            exe_dir = os.path.dirname(sys.executable)
+        else:
+            # Запущено из исходников
+            exe_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        self.log_file_path = os.path.join(exe_dir, "stellar_automation_log.txt")
+
+    # -----------------------------
+    # SETTERS
+    # -----------------------------
     def set_area(self, area):
-        """Set the OCR area"""
         self.area = area
 
     def set_imprint_button(self, coords):
-        """Set the imprint button coordinates"""
         self.imprint_button_coords = coords
 
     def set_effect_delay(self, delay_ms):
-        """Set the visual effect clearing delay in milliseconds"""
         self.effect_delay_ms = delay_ms
 
+    # -----------------------------
+    # LOGGING
+    # -----------------------------
+    def update_status(self, message):
+        timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
+        log_message = f"[{timestamp}] {message}"
+
+        try:
+            with open(self.log_file_path, "a", encoding="utf-8") as f:
+                f.write(log_message + "\n")
+        except:
+            pass
+
+        if self.status_callback:
+            self.status_callback(log_message)
+
+    # -----------------------------
+    # START / STOP
+    # -----------------------------
     def start(self, stat_config):
-        """Start the stellar automation
-        
-        Args:
-            stat_config: Dictionary of {stat_name: min_value} (OR logic - any match is accepted)
-                        min_value can be empty string if no minimum required
-        """
         if not self.area:
             self.update_status("Set area first")
             return False
@@ -55,238 +80,208 @@ class StellarAutomation(BaseAutomation):
             self.update_status("Set Imprint button first")
             return False
 
-        # Connect to game if not already connected
+        self.stop_event.clear()
+
         if not self.game_connector.is_connected():
             if not self.game_connector.connect_to_game():
                 self.update_status("Game not found")
                 return False
 
-        # Normalize stat config (remove spaces, lowercase)
+        # normalize config
         self.stat_config = {}
         for stat_name, min_value in stat_config.items():
-            normalized_name = re.sub(r"\s+", "", stat_name).lower()
-            normalized_value = re.sub(r"\s+", "", min_value).lower() if min_value else ""
-            self.stat_config[normalized_name] = normalized_value
-
-        stats_display = " OR ".join([f"{name}(≥{val})" if val else name 
-                                    for name, val in stat_config.items()])
-        self.update_status(f"Looking for: {stats_display}")
+            name = stat_name.strip().lower()
+            val = re.sub(r"\s+", "", min_value).lower() if min_value else ""
+            self.stat_config[name] = val
 
         self.running = True
         self.wrong_read_counter = 0
         self.stat_counter = {}
         self.iteration_count = 0
 
-        # Start automation in thread
-        threading.Thread(target=self._start_automation_loop, daemon=True).start()
+        # clear log
+        try:
+            with open(self.log_file_path, "w", encoding="utf-8") as f:
+                f.write(
+                    f"=== Stellar Automation Started at "
+                    f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ===\n"
+                )
+        except:
+            pass
+
+        self.update_status("[INFO] Starting automation loop...")
+
+        threading.Thread(
+            target=self._automation_loop,
+            daemon=True
+        ).start()
+
         return True
 
-    def _start_automation_loop(self):
-        """Start the automation loop with initial delay"""
-        time.sleep(3)  # Initial delay
-        self.loop_ocr()
-
     def stop(self):
-        """Stop the stellar automation"""
         self.running = False
+        self.stop_event.set()
         self.update_status("Stellar automation stopped")
+
         if self.stat_counter:
             self.show_stats_summary()
 
-    @staticmethod
-    def numeric_compare(option_min_value_int, text):
-        """Compare numbers in text with minimum value"""
-        numbers_found = re.findall(r"\d+", text)
-        for num_str in numbers_found:
-            val = int(num_str)
-            if val >= option_min_value_int:
-                return True
-        return False
+    # -----------------------------
+    # MAIN LOOP
+    # -----------------------------
+    def _automation_loop(self):
+        time.sleep(3)
 
+        while self.running and not self.stop_event.is_set():
+            self.loop_ocr()
+
+            # delay between rolls with stop checks
+            for _ in range(int(self.delay_ms / 100)):
+                if self.stop_event.is_set():
+                    return
+                time.sleep(0.1)
+
+    # -----------------------------
+    # ONE ITERATION
+    # -----------------------------
     def loop_ocr(self):
-        """Main OCR loop - extracted from main.py"""
-        if self.loop_in_progress:
+        if self.stop_event.is_set() or not self.running:
             return
 
-        if not self.running:
+        if self.loop_in_progress:
             return
 
         self.loop_in_progress = True
 
         try:
-            # Wait for visual effects to appear, then click to close them
-            time.sleep(self.effect_delay_ms / 1000.0)
+            self.update_status(f"[DEBUG] Starting iteration #{self.iteration_count + 1}")
 
-            # Click imprint button (which becomes "close" button) to clear visual effects
+            # effect delay with stop checks
+            for _ in range(int(self.effect_delay_ms / 100)):
+                if self.stop_event.is_set():
+                    self.loop_in_progress = False
+                    return
+                time.sleep(0.1)
+
+            # click to clear effects
             if not self.game_connector.click_at_position(self.imprint_button_coords):
-                self.update_status("Click failed")
-
-            # Small delay to let effects clear
-            time.sleep(0.2)
-
-            # Capture screenshot using BitBlt
-            screenshot = self.game_connector.capture_area_bitblt(self.area)
-            if screenshot is None:
-                self.update_status("Capture failed")
-                self.stop()
+                self.update_status("[ERROR] Click failed")
+                self.loop_in_progress = False
                 return
 
-            # Extract text using Tesseract
+            time.sleep(0.2)
+
+            # screenshot
+            screenshot = self.game_connector.capture_area_bitblt(self.area)
+            if screenshot is None:
+                self.update_status("[ERROR] Screenshot failed")
+                self.stop()
+                self.loop_in_progress = False
+                return
+
             raw_text = self.ocr_engine.extract_text(screenshot)
+            self.update_status(f"[DEBUG] Raw OCR text: '{raw_text.strip()}'")
 
             text = self.ocr_engine.parse_stellar_text(raw_text)
-            
+            self.update_status(f"[DEBUG] Parsed text: '{text}'")
+
             self.iteration_count += 1
 
-            # Check for exactly one number (stellar format validation)
-            numbers_found = self.ocr_engine.find_numbers(text)
+            # extract number
+            stat_value_match = re.search(r'\+\s*(\d+)', text)
+            if stat_value_match:
+                numbers_found = [stat_value_match.group(1)]
+            else:
+                all_numbers = re.findall(r'\d+', text)
+                numbers_found = [all_numbers[-1]] if all_numbers else []
+
+            self.update_status(f"[DEBUG] Extracted stat value(s): {numbers_found}")
 
             if len(numbers_found) != 1:
                 self.wrong_read_counter += 1
-                if self.wrong_read_counter > 2:
-                    self.update_status("Wrong number count - check area definition")
+                self.update_status(f"[WARN] Wrong number count: {len(numbers_found)} ({self.wrong_read_counter}/6)")
+                if self.wrong_read_counter > 6:
+                    self.update_status("[STOP] Too many OCR errors")
                     self.stop()
-                    self.loop_in_progress = False
-                    return
-                else:
-                    self.loop_in_progress = False
-                    # Schedule next attempt with longer delay
-                    threading.Timer(0.7, self.loop_ocr).start()
-                    return
+                self.loop_in_progress = False
+                return
 
             self.wrong_read_counter = 0
+            stat_value_detected = numbers_found[0]
 
-            # Extract stat name and value from text for display and tracking
-            # Parse the text to get stat name and value (format: "Stat Name +Value" or "Stat Name Value")
-            stat_name_detected = None
-            stat_value_detected = None
-            numbers_found = re.findall(r"\d+", text)
-            if numbers_found:
-                stat_value_detected = numbers_found[0]
-            
-            # Try to extract stat name (everything before the number)
+            # extract stat name
             stat_match = re.search(r'(.+?)\s*\+?\s*\d+', text)
-            if stat_match:
-                stat_name_detected = stat_match.group(1).strip()
-            
-            # Track this roll
-            if stat_name_detected and stat_value_detected:
-                stat_key = f"{stat_name_detected} +{stat_value_detected}"
-                self.stat_counter[stat_key] = self.stat_counter.get(stat_key, 0) + 1
-                # Display clean stat info
-                self.update_status(f"Roll #{self.iteration_count}: {stat_name_detected} +{stat_value_detected}")
-            elif stat_name_detected:
-                stat_key = f"{stat_name_detected}"
-                self.stat_counter[stat_key] = self.stat_counter.get(stat_key, 0) + 1
-                self.update_status(f"Roll #{self.iteration_count}: {stat_name_detected}")
+            stat_name_detected = stat_match.group(1).strip() if stat_match else None
+
+            if stat_name_detected:
+                key = f"{stat_name_detected} +{stat_value_detected}"
+                self.stat_counter[key] = self.stat_counter.get(key, 0) + 1
+                self.update_status(f"Roll #{self.iteration_count}: {key}")
             else:
                 self.update_status(f"Roll #{self.iteration_count}: {text}")
 
-            # Check if any stat matches with its individual minimum value (OR logic)
+            # check match
             found_match = False
             matched_stat = None
-            matched_value = None
-            
-            if self.stat_config:
-                for stat_name, min_value in self.stat_config.items():
-                    # Check if stat name is in text
-                    if stat_name in text:
-                        # Special handling for penetration exceptions
-                        if stat_name == "penetration":
-                            exceptions = get_penetration_exceptions()
-                            if any(exc in text for exc in exceptions):
-                                self.update_status("Ignoring penetration exception")
-                                continue
-                        
-                        # Check minimum value for this specific stat
-                        value_matches = True
-                        if min_value:
-                            if min_value.isdigit():
-                                min_val_int = int(min_value)
-                                value_matches = self.numeric_compare(min_val_int, text)
-                            else:
-                                value_matches = (min_value in text)
-                        
-                        # If both stat name and value match (or no value required), we found it!
-                        if value_matches:
-                            found_match = True
-                            matched_stat = stat_name
-                            # Extract the actual value from text for display
-                            matched_value = stat_value_detected if stat_value_detected else "N/A"
-                            break
 
-            # Check success conditions
+            lower_text = text.lower()
+
+            for stat_name, min_value in self.stat_config.items():
+                pattern = r"\b" + re.escape(stat_name) + r"\b"
+                if re.search(pattern, lower_text):
+
+                    if stat_name == "penetration":
+                        exceptions = get_penetration_exceptions()
+                        if any(exc in lower_text for exc in exceptions):
+                            continue
+
+                    value_ok = True
+                    if min_value:
+                        if min_value.isdigit():
+                            value_ok = int(stat_value_detected) >= int(min_value)
+                        else:
+                            value_ok = min_value in lower_text
+
+                    if value_ok:
+                        found_match = True
+                        matched_stat = stat_name
+                        break
+
             if found_match:
-                min_val_display = self.stat_config.get(matched_stat, "")
-                if min_val_display:
-                    self.update_status(f"Found: {matched_stat} {matched_value} (≥{min_val_display})")
-                else:
-                    self.update_status(f"Found: {matched_stat} {matched_value}")
+                self.update_status(f"[SUCCESS] Found: {matched_stat} {stat_value_detected}")
                 try:
-                    # Notify user of success so they can stop watching the log
                     messagebox.showinfo(
                         "Stellar Automation",
-                        f"Desired stat found: {matched_stat} {matched_value}"
-                        + (f" (≥{min_val_display})" if min_val_display else "")
+                        f"Desired stat found: {matched_stat} {stat_value_detected}"
                     )
-                except Exception:
-                    # Keep automation flow even if UI notification fails
+                except:
                     pass
+
                 self.stop()
-            else:
-                # Continue automation - click imprint button
-                if not self.game_connector.is_connected():
-                    if not self.game_connector.connect_to_game():
-                        self.update_status("Connection failed")
-                        self.stop()
-                        return
-
-                # Double click with delay (as in original)
-                if not self.game_connector.click_at_position(self.imprint_button_coords):
-                    self.update_status("Click failed")
-
-                time.sleep(0.3)
-
-                if not self.game_connector.click_at_position(self.imprint_button_coords):
-                    self.update_status("Click failed")
-
                 self.loop_in_progress = False
-                # Schedule next iteration
-                threading.Timer(self.delay_ms / 1000, self.loop_ocr).start()
                 return
 
         except Exception as e:
-            self.update_status(f"Error: {str(e)}")
+            import traceback
+            self.update_status(f"[FATAL ERROR] {e}")
+            self.update_status(traceback.format_exc())
             self.stop()
 
         self.loop_in_progress = False
-    
+
+    # -----------------------------
+    # SUMMARY
+    # -----------------------------
     def show_stats_summary(self):
-        """Show summary of detected stats in console/terminal"""
         print("\n" + "=" * 60)
         print("STELLAR SYSTEM STATISTICS SUMMARY")
         print("=" * 60)
-        
-        total_rolls = sum(self.stat_counter.values())
-        print(f"Total Rolls: {total_rolls}")
-        print()
 
-        if self.stat_counter:
-            # Sort by count (descending)
-            sorted_stats = sorted(self.stat_counter.items(), key=lambda x: x[1], reverse=True)
-            
-            print("DETECTED STATS:")
-            print("-" * 60)
-            for stat_key, count in sorted_stats:
-                # Clean noisy OCR tokens while keeping the stat name/value
-                clean_stat = stat_key.replace("»", " ")
-                clean_stat = re.sub(r'stellarforce', '', clean_stat, flags=re.IGNORECASE)
-                clean_stat = re.sub(r'stellar', '', clean_stat, flags=re.IGNORECASE)
-                clean_stat = re.sub(r'\s+', ' ', clean_stat).strip()
-                if not clean_stat:
-                    clean_stat = stat_key  # fallback to original if cleaning removed everything
-                percentage = (count / total_rolls * 100) if total_rolls > 0 else 0
-                print(f"  {clean_stat:40s} × {count:3d} ({percentage:5.1f}%)")
-            print()
-        
+        total = sum(self.stat_counter.values())
+        print(f"Total Rolls: {total}\n")
+
+        for stat, count in sorted(self.stat_counter.items(), key=lambda x: x[1], reverse=True):
+            pct = (count / total * 100) if total else 0
+            print(f"{stat:40s} × {count:3d} ({pct:5.1f}%)")
+
         print("=" * 60)

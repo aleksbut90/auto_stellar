@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a237e"/>
+      <stop offset="50%" stop-color="#283593"/>
+      <stop offset="100%" stop-color="#1565c0"/>
+    </linearGradient>
+    <linearGradient id="star" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffd54f"/>
+      <stop offset="50%" stop-color="#ffb300"/>
+      <stop offset="100%" stop-color="#ff8f00"/>
+    </linearGradient>
+    <linearGradient id="star2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff176"/>
+      <stop offset="100%" stop-color="#ffd54f"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softShadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Фон -->
+  <rect width="256" height="256" rx="48" fill="url(#bg)" filter="url(#softShadow)"/>
+  
+  <!-- Звёздная россыпь (маленькие звёзды) -->
+  <g filter="url(#glow)">
+    <!-- Верхняя левая звезда -->
+    <circle cx="45" cy="55" r="3" fill="#fff" opacity="0.6"/>
+    <circle cx="85" cy="35" r="2" fill="#fff" opacity="0.5"/>
+    <circle cx="125" cy="42" r="2.5" fill="#fff" opacity="0.7"/>
+    <circle cx="200" cy="48" r="2" fill="#fff" opacity="0.4"/>
+    <circle cx="38" cy="95" r="2" fill="#fff" opacity="0.5"/>
+    <circle cx="218" cy="82" r="3" fill="#fff" opacity="0.6"/>
+    <circle cx="55" cy="145" r="2" fill="#fff" opacity="0.4"/>
+    <circle cx="215" cy="135" r="2" fill="#fff" opacity="0.5"/>
+    <circle cx="42" cy="195" r="2.5" fill="#fff" opacity="0.6"/>
+    <circle cx="208" cy="185" r="2" fill="#fff" opacity="0.5"/>
+    <circle cx="128" cy="215" r="2" fill="#fff" opacity="0.4"/>
+    <circle cx="75" cy="225" r="1.5" fill="#fff" opacity="0.3"/>
+    <circle cx="175" cy="235" r="2" fill="#fff" opacity="0.4"/>
+  </g>
+  
+  <!-- Большая центральная звезда -->
+  <g filter="url(#glow)">
+    <polygon 
+      points="128,48 141,95 192,95 151,124 166,172 128,145 90,172 105,124 64,95 115,95" 
+      fill="url(#star)"
+      stroke="url(#star2)"
+      stroke-width="1.5"
+    />
+  </g>
+  
+  <!-- Маленькие звезды вокруг большой -->
+  <g filter="url(#glow)">
+    <circle cx="82" cy="68" r="5" fill="url(#star2)" opacity="0.8"/>
+    <circle cx="175" cy="62" r="4" fill="url(#star2)" opacity="0.7"/>
+    <circle cx="68" cy="168" r="4.5" fill="url(#star2)" opacity="0.7"/>
+    <circle cx="188" cy="158" r="5" fill="url(#star2)" opacity="0.8"/>
+    <circle cx="128" cy="198" r="4" fill="url(#star2)" opacity="0.6"/>
+  </g>
+  
+  <!-- Иконка автоматизации (шестерёнка в нижнем правом углу) -->
+  <g transform="translate(195, 195)" filter="url(#softShadow)">
+    <circle cx="0" cy="0" r="22" fill="rgba(255,255,255,0.15)"/>
+    <circle cx="0" cy="0" r="16" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="8,4" opacity="0.8"/>
+    <circle cx="0" cy="0" r="8" fill="#fff" opacity="0.9"/>
+  </g>
+</svg>

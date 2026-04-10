@@ -1,18 +1,17 @@
-# Tesseract OCR engine wrapper
-# Replaces PaddleOCR functionality from arrival_skill_ocr
-
 import pytesseract
 import re
 import os
 import sys
+import cv2
+import numpy as np
+from PIL import Image
+
 
 class OCREngine:
     def __init__(self, status_callback=None):
-        """Initialize the Tesseract OCR engine"""
         self.status_callback = status_callback
 
-        # Set up Tesseract path (exactly as in main.py)
-        # The base_path should be the main script directory, not the core module directory
+        # путь к tesseract.exe
         import __main__
         if hasattr(__main__, '__file__'):
             main_script_dir = os.path.dirname(os.path.abspath(__main__.__file__))
@@ -27,98 +26,199 @@ class OCREngine:
             status_callback("Tesseract OCR initialized")
 
     def update_status(self, message):
-        """Update status via callback if available"""
         if self.status_callback:
             self.status_callback(message)
 
+    # ---------------------------------------------------------
+    # ОСНОВНОЙ OCR
+    # ---------------------------------------------------------
     def extract_text(self, image):
-        """
-        Extract text from image using Tesseract
-        Args:
-            image: PIL Image object
-        Returns:
-            Raw text string from OCR
-        """
         try:
             if image is None:
                 return ""
 
-            text = pytesseract.image_to_string(image)
-            return text
+            img = np.array(image)
+            gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+
+            # --- ПРОХОД №1 (обычный) ---
+            _, thresh = cv2.threshold(
+                gray, 0, 255,
+                cv2.THRESH_BINARY + cv2.THRESH_OTSU
+            )
+            text1 = pytesseract.image_to_string(
+                Image.fromarray(thresh),
+                lang="rus+eng",
+                config="--oem 3 --psm 6"
+            )
+            text1 = self._fix_cyrillic_text(text1)
+
+            # Если слово после "Связь" есть — возвращаем
+            if re.search(r"связь\s+\w+", text1.lower()):
+                return text1
+
+            # --- ПРОХОД №2 (усиленный, только для слабого слова) ---
+            # Усиливаем контраст
+            enhanced = cv2.equalizeHist(gray)
+
+            # Инверсия
+            enhanced = cv2.bitwise_not(enhanced)
+
+            # Морфология — расширяем тонкие буквы
+            kernel = np.ones((2, 2), np.uint8)
+            enhanced = cv2.dilate(enhanced, kernel, iterations=1)
+
+            # OCR одной строки
+            text2 = pytesseract.image_to_string(
+                Image.fromarray(enhanced),
+                lang="rus+eng",
+                config="--oem 3 --psm 7"
+            )
+            text2 = self._fix_cyrillic_text(text2)
+
+            # Вставляем найденное слово
+            if text2:
+                return text1.replace("связь", f"связь {text2}")
+
+            return text1
+
         except Exception as e:
             self.update_status(f"OCR error: {str(e)}")
             return ""
 
+
+    # ---------------------------------------------------------
+    # ФИКС ЛАТИНИЦЫ → КИРИЛЛИЦА + исправления под твои логи
+    # ---------------------------------------------------------
+    def _fix_cyrillic_text(self, text):
+        if not text:
+            return ""
+
+        # -----------------------------
+        # 1. Латиница → Кириллица
+        # -----------------------------
+        latin_to_cyr = {
+            'A': 'А', 'a': 'а',
+            'B': 'В', 'b': 'в',
+            'E': 'Е', 'e': 'е',
+            'K': 'К', 'k': 'к',
+            'M': 'М', 'm': 'м',
+            'H': 'Н', 'h': 'н',
+            'O': 'О', 'o': 'о',
+            'P': 'Р', 'p': 'р',
+            'C': 'С', 'c': 'с',
+            'T': 'Т', 't': 'т',
+            'X': 'Х', 'x': 'х',
+            'Y': 'У', 'y': 'у',
+            'Z': 'З', 'z': 'з',
+
+            # OCR-ошибки
+            'R': 'Г', 'r': 'г',
+            'N': 'П', 'n': 'п',
+            'G': 'Д', 'g': 'д',
+            'S': 'С', 's': 'с',
+            'V': 'У', 'v': 'у',
+            'F': 'Ф', 'f': 'ф',
+            'L': 'Л', 'l': 'л',
+            'D': 'Д', 'd': 'д',
+            'U': 'И', 'u': 'и',
+            'J': 'Й', 'j': 'й',
+            'Q': 'К', 'q': 'к',
+            'W': 'Ш', 'w': 'ш',
+        }
+
+        fixed = ""
+        for ch in text:
+            fixed += latin_to_cyr.get(ch, ch)
+
+        fixed = fixed.lower()
+
+        # -----------------------------
+        # 2. Фиксы PvE (все варианты)
+        # -----------------------------
+        pve_variants = [
+            "руе", "pve", "рве", "rve", "pye", "pue", "pве",
+            "pуе", "руe", "руё", "pуе", "pye", "pye"
+        ]
+        for v in pve_variants:
+            fixed = fixed.replace(v, "pve")
+
+        # -----------------------------
+        # 3. Фиксы слова «Горе»
+        # -----------------------------
+        gore_variants = [
+            "торе", "tоре", "тope", "гope", "гope", "гope",
+            "тope", "тope", "тope", "гope", "гope", "гope"
+        ]
+        for v in gore_variants:
+            fixed = fixed.replace(v, "горе")
+
+        # -----------------------------
+        # 4. Фиксы слова «Гнев»
+        # -----------------------------
+        fixed = fixed.replace("meg", "гнев")
+        fixed = fixed.replace("mег", "гнев")
+        fixed = fixed.replace("мег", "гнев")
+        fixed = fixed.replace("гневв", "гнев")
+
+        # -----------------------------
+        # 5. Фиксы слова «Тоска»
+        # -----------------------------
+        fixed = fixed.replace("тосrа", "тоска")
+        fixed = fixed.replace("тосkа", "тоска")
+        fixed = fixed.replace("тосcа", "тоска")
+        fixed = fixed.replace("тосrка", "тоска")
+
+        # -----------------------------
+        # 6. Фиксы слова «Пустота»
+        # -----------------------------
+        fixed = fixed.replace("пустоtа", "пустота")
+        fixed = fixed.replace("пустоta", "пустота")
+        fixed = fixed.replace("пустотаа", "пустота")
+
+        # -----------------------------
+        # 7. Фиксы слова «Забвение»
+        # -----------------------------
+        fixed = fixed.replace("забвeние", "забвение")
+        fixed = fixed.replace("забвениее", "забвение")
+        fixed = fixed.replace("забвeнie", "забвение")
+
+        # -----------------------------
+        # 8. Фиксы «уворота»
+        # -----------------------------
+        fixed = fixed.replace("увороta", "уворота")
+        fixed = fixed.replace("увороtа", "уворота")
+        fixed = fixed.replace("увороt", "уворота")
+
+        # -----------------------------
+        # 9. Фиксы «игнор»
+        # -----------------------------
+        fixed = fixed.replace("игнoр", "игнор")
+        fixed = fixed.replace("игнoр", "игнор")
+        fixed = fixed.replace("игнорр", "игнор")
+
+        # -----------------------------
+        # 10. Фиксы «звезда / звёздная сила»
+        # -----------------------------
+        fixed = fixed.replace("звесдная", "звёздная")
+        fixed = fixed.replace("звесднал", "звёздная")
+        fixed = fixed.replace("звезвыр", "звёздный")
+        fixed = fixed.replace("звезд р", "звезда")
+        fixed = fixed.replace("звездаа", "звезда")
+
+        # -----------------------------
+        # 11. Удаление мусора
+        # -----------------------------
+        fixed = re.sub(r"[^\w\s+ёЁа-яА-Я]", " ", fixed)
+        fixed = re.sub(r"\s+", " ", fixed).strip()
+
+        return fixed
+
+    # ---------------------------------------------------------
+    # ПАРСИНГ СТАТА (минимальный, не ломает кириллицу)
+    # ---------------------------------------------------------
     def parse_stellar_text(self, text):
-        """
-        Parse text for stellar system format
-        Expected format: "Stellar" and "Stellar Force" with option name and value
-        """
-        # Clean up text (same as main.py)
-        text = re.sub(r"\s+", "", text).lower()
-        text = re.sub(r'([A-Za-z]+)4(\d)', r'\1+\2', text)
-
-        if "stellarforce4" in text:
-            text = text.replace("stellarforce4", "stellarforce+")
-
-        return text
-
-    def find_numbers(self, text):
-        """Find all numbers in text"""
-        return re.findall(r"\d+", text)
-
-    def clean_price_text(self, text):
-        """
-        Clean OCR text for price detection
-        Removes dots, spaces, commas, and ALL letters - keep only numbers
-        """
-        # Remove all dots, spaces, commas, and letters - keep only numbers
-        cleaned = re.sub(r'[.,\s]', '', text)  # Remove dots, spaces, commas
-        cleaned = re.sub(r'[a-zA-Z]', '', cleaned)  # Remove all letters
-
-        return cleaned
-
-    def extract_prices(self, text):
-        """
-        Extract min price and weekly average price from OCR text
-        Layout: Weekly average on top, min price below
-        Returns:
-            dict with 'min_price' and 'weekly_avg' keys, or None if not found
-        """
-        try:
-            # Split text into lines to handle top/bottom layout
-            lines = text.strip().split('\n')
-
-            # Clean each line and extract numbers
-            numbers = []
-            for line in lines:
-                cleaned_line = self.clean_price_text(line)
-                # Find all numbers in this line
-                line_numbers = re.findall(r'\d+', cleaned_line)
-                numbers.extend(line_numbers)
-
-            if len(numbers) >= 2:
-                # We have at least 2 numbers (could be same or different)
-                # First number is weekly average (top), second is min price (bottom)
-                return {
-                    'weekly_avg': numbers[0],
-                    'min_price': numbers[1],
-                    'raw_text': text,
-                    'cleaned_text': ' '.join(numbers[:2]),
-                    'all_numbers': numbers
-                }
-            elif len(numbers) == 1:
-                # Only one number found - set both weekly_avg and min_price to same value
-                return {
-                    'weekly_avg': numbers[0],
-                    'min_price': numbers[0],
-                    'raw_text': text,
-                    'cleaned_text': numbers[0],
-                    'all_numbers': numbers
-                }
-            else:
-                return None
-
-        except Exception as e:
-            self.update_status(f"Price extraction error: {str(e)}")
-            return None
+        if not text:
+            return ""
+        text = text.replace("\n", " ").replace("\r", " ")
+        text = re.sub(r"\s+", " ", text)
+        return text.strip().lower()

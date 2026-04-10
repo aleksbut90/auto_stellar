@@ -18,7 +18,7 @@ Write-Host ""
 
 # Step 2: Create new virtual environment
 Write-Host "[2/6] Creating new virtual environment..." -ForegroundColor Yellow
-python -m venv venv
+py -m venv venv
 if ($LASTEXITCODE -ne 0) {
     Write-Host "      ERROR: Failed to create virtual environment!" -ForegroundColor Red
     exit 1
@@ -61,10 +61,10 @@ Write-Host ""
 
 # Step 6: Verify the executable exists
 Write-Host "[6/6] Verifying build..." -ForegroundColor Yellow
-if (Test-Path "dist\Stellar_and_Arrival_Automation.exe") {
-    $fileSize = (Get-Item "dist\Stellar_and_Arrival_Automation.exe").Length / 1MB
+if (Test-Path "dist\Stellar_Automation.exe") {
+    $fileSize = (Get-Item "dist\Stellar_Automation.exe").Length / 1MB
     Write-Host "      SUCCESS! Executable created." -ForegroundColor Green
-    Write-Host "      Location: dist\Stellar_and_Arrival_Automation.exe" -ForegroundColor Green
+    Write-Host "      Location: dist\Stellar_Automation.exe" -ForegroundColor Green
     Write-Host "      Size: $([math]::Round($fileSize, 2)) MB" -ForegroundColor Green
 } else {
     Write-Host "      ERROR: Executable not found!" -ForegroundColor Red

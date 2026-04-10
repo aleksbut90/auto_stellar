@@ -1,4 +1,4 @@
-# Troubleshooting tab UI
+# Troubleshooting tab UI - Решение проблем
 # Provides troubleshooting information and common solutions
 
 import tkinter as tk
@@ -6,91 +6,110 @@ from tkinter import ttk
 
 class TroubleshootingTab:
     def __init__(self, parent_frame, main_window):
-        """Initialize the Troubleshooting tab"""
+        """Инициализация вкладки Решение проблем"""
         self.parent_frame = parent_frame
         self.main_window = main_window
-        
-        # Create UI
+
+        # Создание UI
         self.create_ui()
-    
+
     def create_ui(self):
-        """Create the troubleshooting UI"""
-        # Main frame with padding
-        main_frame = ttk.Frame(self.parent_frame, padding="10")
+        """Создание UI решения проблем"""
+        # Главный фрейм с отступами
+        main_frame = ttk.Frame(self.parent_frame, padding="20")
         main_frame.pack(fill=tk.BOTH, expand=True)
-        
-        # Create scrollable frame
-        canvas = tk.Canvas(main_frame)
+
+        # Создание прокручиваемого фрейма
+        canvas = tk.Canvas(main_frame, highlightthickness=0)
         scrollbar = ttk.Scrollbar(main_frame, orient="vertical", command=canvas.yview)
         scrollable_frame = ttk.Frame(canvas)
-        
+
         scrollable_frame.bind(
             "<Configure>",
             lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
         )
-        
+
         canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
         canvas.configure(yscrollcommand=scrollbar.set)
-        
+
         canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        
-        # Run as Admin section
-        admin_frame = ttk.LabelFrame(scrollable_frame, text="Run as Administrator", padding="10")
-        admin_frame.pack(fill=tk.X, pady=(0, 10))
-        
-        admin_text = "The application must be run as Administrator for proper functionality.\n" \
-                     "Right-click the executable and select 'Run as administrator'."
-        ttk.Label(admin_frame, text=admin_text, wraplength=600).pack(anchor=tk.W)
-        
-        # OCR Issues section
-        ocr_frame = ttk.LabelFrame(scrollable_frame, text="OCR (Optical Character Recognition) Issues", padding="10")
-        ocr_frame.pack(fill=tk.X, pady=(0, 10))
-        
-        # Scaling
+
+        # ====== Запуск от имени администратора ======
+        admin_frame = ttk.LabelFrame(scrollable_frame, text="🔐 Запуск от имени администратора", padding="15")
+        admin_frame.pack(fill=tk.X, pady=(0, 15))
+
+        admin_text = ("⚠️ Приложение должно быть запущено от имени администратора для корректной работы.\n\n"
+                     "📌 Как запустить:\n"
+                     "Щёлкните правой кнопкой мыши по исполняемому файлу → "
+                     "'Запуск от имени администратора'")
+        ttk.Label(admin_frame, text=admin_text, wraplength=650,
+                 font=self.main_window.default_font).pack(anchor=tk.W)
+
+        # ====== Проблемы OCR ======
+        ocr_frame = ttk.LabelFrame(scrollable_frame, text="👁️ Проблемы с распознаванием текста (OCR)", padding="15")
+        ocr_frame.pack(fill=tk.X, pady=(0, 15))
+
+        # Масштабирование
         scaling_frame = ttk.Frame(ocr_frame)
-        scaling_frame.pack(fill=tk.X, pady=(0, 10))
-        
-        ttk.Label(scaling_frame, text="Display Scaling:", font=("Arial", 9, "bold")).pack(anchor=tk.W)
-        scaling_text = "Set Windows display scaling to 100% (especially important for laptop users).\n" \
-                       "TL;DR: Right-click on desktop → Display settings → Scale → 100%"
-        ttk.Label(scaling_frame, text=scaling_text, wraplength=600).pack(anchor=tk.W, pady=(5, 0))
-        
-        # Game UI Size
+        scaling_frame.pack(fill=tk.X, pady=(0, 12))
+
+        ttk.Label(scaling_frame, text="📐 Масштабирование дисплея:", 
+                 font=self.main_window.heading_font).pack(anchor=tk.W)
+        scaling_text = ("Установите масштабирование дисплея Windows на 100% "
+                       "(особенно важно для пользователей ноутбуков).\n\n"
+                       "📝 Инструкция:\n"
+                       "Правой кнопкой на рабочем столе → Параметры дисплея → "
+                       "Масштаб → 100%")
+        ttk.Label(scaling_frame, text=scaling_text, wraplength=650,
+                 font=self.main_window.default_font).pack(anchor=tk.W, pady=(5, 0))
+
+        # Размер игрового интерфейса
         ui_size_frame = ttk.Frame(ocr_frame)
-        ui_size_frame.pack(fill=tk.X, pady=(0, 10))
-        
-        ttk.Label(ui_size_frame, text="In-Game UI Size:", font=("Arial", 9, "bold")).pack(anchor=tk.W)
-        ui_size_text = "Don't make the UI in-game too small. The smaller the in-game UI, the less consistent the OCR is.\n" \
-                       "Default setting is fine, or slightly smaller (10-20% reduction max)."
-        ttk.Label(ui_size_frame, text=ui_size_text, wraplength=600).pack(anchor=tk.W, pady=(5, 0))
-        
-        # Game Resolution
+        ui_size_frame.pack(fill=tk.X, pady=(0, 12))
+
+        ttk.Label(ui_size_frame, text="🎮 Размер внутриигрового интерфейса:", 
+                 font=self.main_window.heading_font).pack(anchor=tk.W)
+        ui_size_text = ("Не делайте интерфейс в игре слишком маленьким. "
+                       "Чем меньше интерфейс, тем менее стабильно работает OCR.\n\n"
+                       "✅ Рекомендуемые настройки:\n"
+                       "По умолчанию или немного меньше (максимум уменьшение на 10-20%).")
+        ttk.Label(ui_size_frame, text=ui_size_text, wraplength=650,
+                 font=self.main_window.default_font).pack(anchor=tk.W, pady=(5, 0))
+
+        # Разрешение игры
         resolution_frame = ttk.Frame(ocr_frame)
-        resolution_frame.pack(fill=tk.X, pady=(0, 10))
-        
-        ttk.Label(resolution_frame, text="Game Resolution:", font=("Arial", 9, "bold")).pack(anchor=tk.W)
-        resolution_text = "Recommended game resolution: 1920x1080"
-        ttk.Label(resolution_frame, text=resolution_text, wraplength=600).pack(anchor=tk.W, pady=(5, 0))
-        
-        # Font
+        resolution_frame.pack(fill=tk.X, pady=(0, 12))
+
+        ttk.Label(resolution_frame, text="🖥️ Разрешение игры:", 
+                 font=self.main_window.heading_font).pack(anchor=tk.W)
+        resolution_text = "✅ Рекомендуемое разрешение: 1920x1080"
+        ttk.Label(resolution_frame, text=resolution_text, wraplength=650,
+                 font=self.main_window.default_font).pack(anchor=tk.W, pady=(5, 0))
+
+        # Шрифт
         font_frame = ttk.Frame(ocr_frame)
-        font_frame.pack(fill=tk.X, pady=(0, 10))
-        
-        ttk.Label(font_frame, text="Game Font:", font=("Arial", 9, "bold")).pack(anchor=tk.W)
-        font_text = "Use default font in game: Tahoma"
-        ttk.Label(font_frame, text=font_text, wraplength=600).pack(anchor=tk.W, pady=(5, 0))
-        
-        # Delay settings
-        delay_frame = ttk.LabelFrame(scrollable_frame, text="Collection Filler Delay Settings", padding="10")
-        delay_frame.pack(fill=tk.X, pady=(0, 10))
-        
-        delay_text = "Don't set the delay too low. Around 30ms is fast enough. If you have bad ping, you may need higher values."
-        ttk.Label(delay_frame, text=delay_text, wraplength=600).pack(anchor=tk.W)
-        
-        # Red dot images
-        reddot_frame = ttk.LabelFrame(scrollable_frame, text="Red Dot Images", padding="10")
-        reddot_frame.pack(fill=tk.X, pady=(0, 10))
-        
-        reddot_text = "The red dot PNG image red-dot.png must be in the same folder as the executable. The collection tracker is looking for the red-dot to determine which collections are still available to be filled."
-        ttk.Label(reddot_frame, text=reddot_text, wraplength=600).pack(anchor=tk.W)
+        font_frame.pack(fill=tk.X)
+
+        ttk.Label(font_frame, text="🔤 Шрифт игры:", 
+                 font=self.main_window.heading_font).pack(anchor=tk.W)
+        font_text = "✅ Используйте шрифт по умолчанию в игре: Tahoma"
+        ttk.Label(font_frame, text=font_text, wraplength=650,
+                 font=self.main_window.default_font).pack(anchor=tk.W, pady=(5, 0))
+
+        # ====== Дополнительные рекомендации ======
+        tips_frame = ttk.LabelFrame(scrollable_frame, text="💡 Дополнительные рекомендации", padding="15")
+        tips_frame.pack(fill=tk.X, pady=(0, 10))
+
+        tips_text = ("🚀 Оптимизация производительности:\n\n"
+                    "• Не устанавливайте задержку слишком низкой\n"
+                    "  - Для быстрого интернета: около 30 мс\n"
+                    "  - При плохом пинге: используйте более высокие значения (100-500 мс)\n\n"
+                    "• Файл red-dot.png должен находиться в той же папке, что и исполняемый файл\n"
+                    "  - Этот файл используется для обнаружения незаполненных коллекций\n\n"
+                    "• При проблемах с OCR попробуйте:\n"
+                    "  - Перезапустить приложение\n"
+                    "  - Переопределить область OCR\n"
+                    "  - Проверить что игра в окне и не свёрнута")
+        ttk.Label(tips_frame, text=tips_text, wraplength=650,
+                 font=self.main_window.default_font).pack(anchor=tk.W)

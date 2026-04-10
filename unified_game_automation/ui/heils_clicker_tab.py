@@ -5,13 +5,13 @@ from core.settings_manager import SettingsManager
 
 
 class HeilsClickerTab:
-    """Simple continuous clicker that clicks at a defined point until stopped."""
+    """Простой непрерывный кликер, который кликает в определенной точке до остановки."""
 
     def __init__(self, parent_frame, main_window):
         self.parent_frame = parent_frame
         self.main_window = main_window
 
-        # Settings manager for persistence (using unified settings.json)
+        # Менеджер настроек для сохранения (используя unified settings.json)
         self.settings = SettingsManager(tab_section="heils_clicker")
 
         self.automation = HeilsClickerAutomation(
@@ -19,37 +19,37 @@ class HeilsClickerTab:
             main_window.update_status
         )
 
-        # UI state
+        # Состояние UI
         self.click_coords = None
-        self.click_coord_var = tk.StringVar(value="Not set")
-        self.delay_var = tk.IntVar(value=200)  # ms
+        self.click_coord_var = tk.StringVar(value="Не установлена")
+        self.delay_var = tk.IntVar(value=200)  # мс
 
         self.create_ui()
         
-        # Load saved settings
+        # Загрузка сохраненных настроек
         self.load_saved_settings()
 
     def create_ui(self):
         main_frame = ttk.Frame(self.parent_frame, padding="10")
         main_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Content frame that can shrink (everything except buttons)
+        # Фрейм контента, который может сжиматься (все кроме кнопок)
         content_frame = ttk.Frame(main_frame)
         content_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Coordinates section
-        coords_frame = ttk.LabelFrame(content_frame, text="Click Target", padding="10")
+        # Секция координат
+        coords_frame = ttk.LabelFrame(content_frame, text="Цель клика", padding="10")
         coords_frame.pack(fill=tk.X, pady=(0, 10))
 
         coord_row = ttk.Frame(coords_frame)
         coord_row.pack(fill=tk.X, pady=2)
 
-        ttk.Label(coord_row, text="Position:").pack(side=tk.LEFT)
+        ttk.Label(coord_row, text="Позиция:").pack(side=tk.LEFT)
         ttk.Label(coord_row, textvariable=self.click_coord_var, foreground="blue").pack(side=tk.LEFT, padx=(5, 0))
-        ttk.Button(coord_row, text="Set Click Position", command=self.set_click_position).pack(side=tk.RIGHT)
+        ttk.Button(coord_row, text="Установить позицию клика", command=self.set_click_position).pack(side=tk.RIGHT)
 
-        # Delay section
-        delay_frame = ttk.LabelFrame(content_frame, text="Delay Between Clicks (ms)", padding="10")
+        # Секция задержки
+        delay_frame = ttk.LabelFrame(content_frame, text="Задержка между кликами (мс)", padding="10")
         delay_frame.pack(fill=tk.X, pady=(0, 10))
 
         delay_row = ttk.Frame(delay_frame)
@@ -68,55 +68,55 @@ class HeilsClickerTab:
         self.delay_var.trace_add("write", lambda *_: self.update_delay())
 
     def set_click_position(self):
-        """Capture a single click position from the game window."""
+        """Захват позиции клика из окна игры."""
         def on_success(rel_x, rel_y):
             self.click_coords = (rel_x, rel_y)
             self.automation.set_click_position(self.click_coords)
             self.click_coord_var.set(f"({rel_x}, {rel_y})")
-            self.main_window.update_status(f"Click position set to ({rel_x}, {rel_y})")
-            # Save to settings
+            self.main_window.update_status(f"Позиция клика установлена на ({rel_x}, {rel_y})")
+            # Сохранение в настройки
             self.settings.set_button("click_position", (rel_x, rel_y))
             self.main_window.update_unified_buttons()
 
         self.main_window.capture_button_coordinates(
-            "Click Target",
-            "Click the point in-game where you want Heils Clicker to click repeatedly.",
+            "Цель клика",
+            "Кликните по точке в игре, где Heils Кликер должен кликать неоднократно.",
             on_success
         )
 
     def update_delay(self):
-        """Update delay in automation whenever the value changes."""
+        """Обновление задержки в автоматизации при изменении значения."""
         try:
             val = int(str(self.delay_var.get() or "0"))
         except Exception:
             val = 0
         self.automation.set_delay_ms(val)
-        # Save to settings
+        # Сохранение в настройки
         self.settings.set_delay_ms(val)
     
     def load_saved_settings(self):
-        """Load saved settings from file"""
-        # Load click position
+        """Загрузка сохраненных настроек из файла"""
+        # Загрузка позиции клика
         click_pos = self.settings.get_button("click_position")
         if click_pos:
             self.click_coords = click_pos
             self.automation.set_click_position(self.click_coords)
             self.click_coord_var.set(f"({click_pos[0]}, {click_pos[1]})")
-            # Don't call update_unified_buttons here - it's called after all tabs are initialized
+            # Не вызывать update_unified_buttons здесь - вызывается после инициализации всех вкладок
         
-        # Load delay
+        # Загрузка задержки
         delay_ms = self.settings.get_delay_ms()
         if delay_ms:
             self.delay_var.set(delay_ms)
             self.automation.set_delay_ms(delay_ms)
 
     def can_start(self):
-        """Check if automation can be started (click position is set)"""
+        """Проверка возможности запуска автоматизации (позиция клика установлена)"""
         return self.click_coords is not None
     
     def start_clicking(self):
-        """Start the click loop."""
-        if not self.main_window.set_running_tool("Heils Clicker"):
+        """Запуск цикла кликов."""
+        if not self.main_window.set_running_tool("Heils Кликер"):
             return
 
         self.update_delay()
@@ -125,13 +125,13 @@ class HeilsClickerTab:
             self.main_window.clear_running_tool()
 
     def stop_clicking(self):
-        """Stop the click loop."""
+        """Остановка цикла кликов."""
         self.automation.stop()
         self.main_window.clear_running_tool()
-        self.main_window.update_status("Heils Clicker stopped")
+        self.main_window.update_status("Heils Кликер остановлен")
 
     def emergency_stop(self):
-        """Emergency stop."""
+        """Аварийная остановка."""
         self.automation.emergency_stop()
         self.main_window.clear_running_tool()
 

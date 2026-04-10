@@ -1,6 +1,8 @@
 # Base automation class with shared functionality
 # Provides common methods for all automation types
 
+import threading
+
 class BaseAutomation:
     """Base class for all automation types with shared functionality"""
     
@@ -10,6 +12,7 @@ class BaseAutomation:
         self.ocr_engine = ocr_engine
         self.status_callback = status_callback
         self.running = False
+        self.stop_event = threading.Event()
     
     def update_status(self, message):
         """Update status via callback if available"""
@@ -19,7 +22,8 @@ class BaseAutomation:
     def emergency_stop(self):
         """Emergency stop the automation - shared implementation"""
         if self.running:
-            self.stop()
+            self.stop_event.set()
+            self.running = False
             self.update_status("🚨 EMERGENCY STOP - Automation stopped!")
     
     def stop(self):
