@@ -1,1 +1,38 @@
-(unified_game_automation/automation/stellar_automation.py, unified_game_automation/core/ocr_engine.py)
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.egg-info/
+*.egg
+dist/
+build/
+*.spec.bak
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+stellar_automation_log.txt
+error.txt
+run_log.txt
+
+# User settings (contains coordinates, may be personal)
+settings.json
+
+# Build scripts helpers
+create_icon.py
+create_ico.py

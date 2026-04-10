@@ -8,10 +8,10 @@ import threading
 import mouse
 from core.game_connector import GameConnector
 from core.ocr_engine import OCREngine
+# ОТКЛЮЧЕНО: from ui.arrival_tab import ArrivalTab
+# ОТКЛЮЧЕНО: from ui.collection_tab import CollectionTab
+# ОТКЛЮЧЕНО: from ui.heils_clicker_tab import HeilsClickerTab
 from ui.stellar_tab import StellarTab
-from ui.arrival_tab import ArrivalTab
-from ui.collection_tab import CollectionTab
-from ui.heils_clicker_tab import HeilsClickerTab
 from ui.troubleshooting_tab import TroubleshootingTab
 from ui.help_tab import HelpTab
 
@@ -19,26 +19,49 @@ class MainWindow:
     def __init__(self):
         """Инициализация главного окна с вкладками"""
         self.root = tk.Tk()
-        self.root.title("Автоматизация Звездной Россыпи и Крыльев Силы")
-        self.root.geometry("800x900")
+        self.root.title("Автоматизация Звёздной Россыпи")
+        self.root.geometry("650x900")
         self.root.attributes("-topmost", True)
         
-        # Настройка масштабируемости шрифтов
-        self.default_font = ("Arial", 10)
-        self.heading_font = ("Arial", 11, "bold")
+        # Цветовая схема
+        self.colors = {
+            "bg": "#F5F5F5",
+            "accent": "#2196F3",
+            "success": "#4CAF50",
+            "warning": "#FF9800",
+            "danger": "#F44336",
+            "text": "#212121",
+            "text_secondary": "#757575"
+        }
+
+        # Настройка масштабируемости шрифтов (увеличенные)
+        self.default_font = ("Segoe UI", 12)
+        self.heading_font = ("Segoe UI", 13, "bold")
+        self.title_font = ("Segoe UI", 14, "bold")
 
         # Отслеживание текущего запущенного инструмента (взаимное исключение)
         self.current_running_tool = None
 
         # Инициализация переменной статуса
-        self.status_var = tk.StringVar(value="Инициализация...")
+        self.status_var = tk.StringVar(value="Готово к работе")
 
         # Общие компоненты (после создания status_var)
         self.game_connector = GameConnector(self.update_status)
         self.ocr_engine = OCREngine(self.update_status)
 
         # Настройка аварийной остановки (клавиша ESC)
-        keyboard.add_hotkey('esc', self.emergency_stop)
+        try:
+            keyboard.add_hotkey('esc', self.emergency_stop)
+            self.keyboard_enabled = True
+        except Exception as e:
+            print(f"⚠️ Не удалось настроить горячую клавишу ESC (запустите от администратора): {e}")
+            self.keyboard_enabled = False
+
+        # Настройка стилей
+        self.configure_styles()
+
+        # Установка иконки окна
+        self.set_window_icon()
 
         # Создание UI
         self.create_ui()
@@ -46,63 +69,108 @@ class MainWindow:
         # Настройка обработчика закрытия окна
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
+    def set_window_icon(self):
+        """Установка иконки окна"""
+        try:
+            import os
+            # Иконка рядом с main.py
+            icon_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "app_icon.png")
+            if os.path.exists(icon_path):
+                icon = tk.PhotoImage(file=icon_path)
+                self.root.iconphoto(True, icon)
+                self.icon = icon  # Сохраняем ссылку чтобы GC не удалил
+        except Exception as e:
+            pass  # Если иконка не загрузилась - не страшно
+
+    def configure_styles(self):
+        """Настройка современных стилей для виджетов"""
+        try:
+            style = ttk.Style()
+            style.theme_use('vista')  # Более стабильная тема для Windows
+        except:
+            pass  # Если тема не доступна, используем стандартную
+
     def create_ui(self):
         """Создание главного UI с вкладками"""
         # Главный фрейм с увеличенными отступами
-        main_frame = ttk.Frame(self.root, padding="15")
+        main_frame = ttk.Frame(self.root, padding="20")
         main_frame.pack(fill=tk.BOTH, expand=True)
+        main_frame.configure(style='TFrame')
 
-        # Авто-подключение к игре и отображение статуса
+        # Авто-подключение к игре и отображение статуса подключения
         self.auto_connect_to_game()
 
-        # Информация об аварийной остановке - размещена сверху для лучшей видимости
+        # Панель статуса (сверху)
+        status_bar = ttk.Frame(main_frame)
+        status_bar.pack(fill=tk.X, pady=(0, 15))
+        
+        # Индикатор статуса
+        self.status_icon = ttk.Label(status_bar, text="●", 
+                                    foreground=self.colors['success'],
+                                    font=("Segoe UI", 14))
+        self.status_icon.pack(side=tk.LEFT)
+        
+        self.status_label = ttk.Label(status_bar, textvariable=self.status_var,
+                                     style='Status.TLabel')
+        self.status_label.pack(side=tk.LEFT, padx=(8, 0))
+
+        # Аварийная остановка - выделена цветом
         emergency_frame = ttk.Frame(main_frame)
         emergency_frame.pack(fill=tk.X, pady=(0, 15))
-        emergency_label = ttk.Label(emergency_frame, text="Аварийная остановка: ESC",
-                                   foreground="red", font=self.heading_font)
-        emergency_label.pack(anchor=tk.W)
+        emergency_frame.configure(style='TFrame')
+        
+        emergency_bg = ttk.Frame(emergency_frame, relief=tk.FLAT)
+        emergency_bg.pack(fill=tk.X)
+        
+        # Красная полоска слева для привлечения внимания
+        warning_strip = tk.Frame(emergency_bg, bg=self.colors['danger'], width=4)
+        warning_strip.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 10))
+        
+        emergency_label = ttk.Label(emergency_bg, text="🚨 Аварийная остановка: ESC",
+                                   style='Emergency.TLabel')
+        emergency_label.pack(side=tk.LEFT, pady=8)
 
         # Универсальные кнопки Старт/Стоп
         control_frame = ttk.Frame(main_frame)
-        control_frame.pack(fill=tk.X, pady=(0, 15))
+        control_frame.pack(fill=tk.X, pady=(0, 20))
         
-        self.btn_start = ttk.Button(control_frame, text="Старт", command=self.unified_start, state=tk.DISABLED)
+        # Контейнер для кнопок с выравниванием по центру
+        buttons_container = ttk.Frame(control_frame)
+        buttons_container.pack(fill=tk.X)
+
+        self.btn_start = ttk.Button(buttons_container, text="▶  Старт", 
+                                   command=self.unified_start, state=tk.DISABLED)
         self.btn_start.pack(side=tk.LEFT, padx=(0, 10))
-        
-        self.btn_stop = ttk.Button(control_frame, text="Стоп", command=self.unified_stop, state=tk.DISABLED)
+
+        self.btn_stop = ttk.Button(buttons_container, text="⏹  Стоп", 
+                                  command=self.unified_stop, state=tk.DISABLED)
         self.btn_stop.pack(side=tk.LEFT)
 
         # Создание книги вкладок
         self.notebook = ttk.Notebook(main_frame)
-        self.notebook.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
-        
+        self.notebook.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
+
         # Привязка события смены вкладки для остановки автоматизации при переключении
         self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_changed)
 
-        # Создание фреймов для вкладок
-        arrival_frame = ttk.Frame(self.notebook)
+        # Создание фреймов для вкладок (ТОЛЬКО АКТИВНЫЕ)
         stellar_frame = ttk.Frame(self.notebook)
-        collection_frame = ttk.Frame(self.notebook)
-        heils_frame = ttk.Frame(self.notebook)
-        troubleshooting_frame = ttk.Frame(self.notebook)
         help_frame = ttk.Frame(self.notebook)
+        troubleshooting_frame = ttk.Frame(self.notebook)
 
-        # Добавление вкладок в книгу (Крылья Силы первыми)
-        self.notebook.add(arrival_frame, text="Крылья Силы")
-        self.notebook.add(stellar_frame, text="Звездная Россыпь")
-        self.notebook.add(collection_frame, text="Заполнитель Коллекции")
-        self.notebook.add(heils_frame, text="Heils Кликер")
-        self.notebook.add(help_frame, text="Помощь")
-        self.notebook.add(troubleshooting_frame, text="Решение Проблем")
+        # Добавление вкладок в книгу (только активные)
+        self.notebook.add(stellar_frame, text="⭐ Звёздная Россыпь")
+        self.notebook.add(help_frame, text="❓ Помощь")
+        self.notebook.add(troubleshooting_frame, text="🔧 Решение Проблем")
 
-        # Create tab instances
-        self.arrival_tab = ArrivalTab(arrival_frame, self)
+        # Create tab instances (только активные вкладки)
+        # ОТКЛЮЧЕНО: self.arrival_tab = ArrivalTab(arrival_frame, self)
         self.stellar_tab = StellarTab(stellar_frame, self)
-        self.collection_tab = CollectionTab(collection_frame, self)
-        self.heils_clicker_tab = HeilsClickerTab(heils_frame, self)
+        # ОТКЛЮЧЕНО: self.collection_tab = CollectionTab(collection_frame, self)
+        # ОТКЛЮЧЕНО: self.heils_clicker_tab = HeilsClickerTab(heils_frame, self)
         self.help_tab = HelpTab(help_frame, self)
         self.troubleshooting_tab = TroubleshootingTab(troubleshooting_frame, self)
-        
+
         # Update unified buttons after all tabs are loaded
         self.update_unified_buttons()
 
@@ -159,11 +227,9 @@ class MainWindow:
         """Получение экземпляра текущей выбранной вкладки"""
         try:
             selected_index = self.notebook.index(self.notebook.select())
+            # Только активные вкладки: Stellar, Help, Troubleshooting
             tabs = [
-                self.arrival_tab,
                 self.stellar_tab,
-                self.collection_tab,
-                self.heils_clicker_tab,
                 self.help_tab,
                 self.troubleshooting_tab
             ]
@@ -205,17 +271,11 @@ class MainWindow:
         """Универсальный метод остановки - останавливает любую запущенную автоматизацию"""
         if not self.current_running_tool:
             return
-        
+
         # Остановка whichever инструмент запущен
         if self.current_running_tool == "Звездная Россыпь":
             self.stellar_tab.stop_automation()
-        elif self.current_running_tool == "Крылья Силы":
-            self.arrival_tab.stop_automation()
-        elif self.current_running_tool == "Заполнитель Коллекции":
-            self.collection_tab.stop_automation()
-        elif self.current_running_tool == "Heils Кликер":
-            self.heils_clicker_tab.stop_clicking()
-        
+
         self.clear_running_tool()
     
     def capture_button_coordinates(self, button_name, instruction_text, success_callback):
@@ -287,12 +347,6 @@ class MainWindow:
             # Остановка whichever инструмент запущен
             if self.current_running_tool == "Звездная Россыпь":
                 self.stellar_tab.emergency_stop()
-            elif self.current_running_tool == "Крылья Силы":
-                self.arrival_tab.emergency_stop()
-            elif self.current_running_tool == "Заполнитель Коллекции":
-                self.collection_tab.emergency_stop()
-            elif self.current_running_tool == "Heils Кликер":
-                self.heils_clicker_tab.emergency_stop()
 
             self.clear_running_tool()
 
