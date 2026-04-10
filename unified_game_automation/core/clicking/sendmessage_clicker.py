@@ -33,12 +33,16 @@ class SendMessageClicker(BaseClicker):
             if adjust_for_client_area and self.get_offset_callback:
                 offset = self.get_offset_callback()
                 if offset:
-                    click_x = coords[0] - offset[0]
-                    click_y = coords[1] - offset[1]
+                    click_x = int(coords[0] - offset[0])
+                    click_y = int(coords[1] - offset[1])
                 else:
-                    click_x, click_y = coords
+                    click_x, click_y = int(coords[0]), int(coords[1])
             else:
-                click_x, click_y = coords
+                click_x, click_y = int(coords[0]), int(coords[1])
+            
+            # Ensure coordinates are non-negative
+            click_x = max(0, click_x)
+            click_y = max(0, click_y)
             
             # Create the lParam for the click coordinates
             lParam = win32api.MAKELONG(click_x, click_y)
@@ -67,12 +71,16 @@ class SendMessageClicker(BaseClicker):
             if adjust_for_client_area and self.get_offset_callback:
                 offset = self.get_offset_callback()
                 if offset:
-                    click_x = coords[0] - offset[0]
-                    click_y = coords[1] - offset[1]
+                    click_x = int(coords[0] - offset[0])
+                    click_y = int(coords[1] - offset[1])
                 else:
-                    click_x, click_y = coords
+                    click_x, click_y = int(coords[0]), int(coords[1])
             else:
-                click_x, click_y = coords
+                click_x, click_y = int(coords[0]), int(coords[1])
+            
+            # Ensure coordinates are non-negative
+            click_x = max(0, click_x)
+            click_y = max(0, click_y)
             
             # Create the lParam for the click coordinates
             lParam = win32api.MAKELONG(click_x, click_y)
@@ -101,12 +109,16 @@ class SendMessageClicker(BaseClicker):
             if adjust_for_client_area and self.get_offset_callback:
                 offset = self.get_offset_callback()
                 if offset:
-                    click_x = coords[0] - offset[0]
-                    click_y = coords[1] - offset[1]
+                    click_x = int(coords[0] - offset[0])
+                    click_y = int(coords[1] - offset[1])
                 else:
-                    click_x, click_y = coords
+                    click_x, click_y = int(coords[0]), int(coords[1])
             else:
-                click_x, click_y = coords
+                click_x, click_y = int(coords[0]), int(coords[1])
+            
+            # Ensure coordinates are non-negative
+            click_x = max(0, click_x)
+            click_y = max(0, click_y)
             
             # Create the lParam for the click coordinates
             lParam = win32api.MAKELONG(click_x, click_y)

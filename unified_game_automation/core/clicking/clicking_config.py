@@ -13,8 +13,8 @@ from .postmessage_clicker import PostMessageClicker
 #   - SendMessageClicker  : Windows API SendMessage (background friendly)
 #   - PostMessageClicker  : Windows API PostMessage (background friendly, async)
 
-# Use PostMessage to support minimized/background windows for Heils Clicker
-ACTIVE_CLICKER = PostMessageClicker  # <-- Change this to test different methods
+# Use SendMessage for more reliable clicking (PostMessage can be unreliable with some games)
+ACTIVE_CLICKER = SendMessageClicker  # <-- Change this to test different methods
 
 # ============================================================================
 

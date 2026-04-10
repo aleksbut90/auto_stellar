@@ -36,10 +36,10 @@ Write-Host "      Executable built successfully." -ForegroundColor Green
 Write-Host ""
 
 # Verify the executable exists
-if (Test-Path "dist\Stellar_and_Arrival_Automation.exe") {
-    $fileSize = (Get-Item "dist\Stellar_and_Arrival_Automation.exe").Length / 1MB
+if (Test-Path "dist\Stellar_Automation.exe") {
+    $fileSize = (Get-Item "dist\Stellar_Automation.exe").Length / 1MB
     Write-Host "SUCCESS! Executable created." -ForegroundColor Green
-    Write-Host "Location: dist\Stellar_and_Arrival_Automation.exe" -ForegroundColor Green
+    Write-Host "Location: dist\Stellar_Automation.exe" -ForegroundColor Green
     Write-Host "Size: $([math]::Round($fileSize, 2)) MB" -ForegroundColor Green
 } else {
     Write-Host "ERROR: Executable not found!" -ForegroundColor Red

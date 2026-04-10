@@ -50,8 +50,8 @@ class ArrivalTab:
 
     def create_ui(self):
         """Создание UI вкладки Крылья Силы"""
-        # Главный фрейм с отступами
-        main_frame = ttk.Frame(self.parent_frame, padding="10")
+        # Главный фрейм с увеличенными отступами
+        main_frame = ttk.Frame(self.parent_frame, padding="15")
         main_frame.pack(fill=tk.BOTH, expand=True)
 
         # Фрейм контента, который может сжиматься (все кроме кнопок)
@@ -59,44 +59,44 @@ class ArrivalTab:
         content_frame.pack(fill=tk.BOTH, expand=True)
 
         # Секция координат кнопок
-        coord_frame = ttk.LabelFrame(content_frame, text="Координаты кнопок", padding="5")
-        coord_frame.pack(fill=tk.X, pady=(0, 10))
+        coord_frame = ttk.LabelFrame(content_frame, text="Координаты кнопок", padding="10")
+        coord_frame.pack(fill=tk.X, pady=(0, 15))
 
         # Координаты кнопки Применить
         apply_frame = ttk.Frame(coord_frame)
-        apply_frame.pack(fill=tk.X, pady=2)
+        apply_frame.pack(fill=tk.X, pady=5)
 
-        ttk.Label(apply_frame, text="Кнопка Применить:").pack(side=tk.LEFT)
+        ttk.Label(apply_frame, text="Кнопка Применить:", font=self.main_window.default_font).pack(side=tk.LEFT)
         self.apply_coord_var = tk.StringVar(value="Не установлена")
-        ttk.Label(apply_frame, textvariable=self.apply_coord_var, foreground="blue").pack(side=tk.LEFT, padx=(5, 10))
+        ttk.Label(apply_frame, textvariable=self.apply_coord_var, foreground="blue", font=self.main_window.default_font).pack(side=tk.LEFT, padx=(5, 10))
         ttk.Button(apply_frame, text="Установить кнопку Применить", command=self.set_apply_button).pack(side=tk.LEFT)
 
         # Координаты кнопки Изменить
         change_frame = ttk.Frame(coord_frame)
-        change_frame.pack(fill=tk.X, pady=2)
+        change_frame.pack(fill=tk.X, pady=5)
 
-        ttk.Label(change_frame, text="Кнопка Изменить:").pack(side=tk.LEFT)
+        ttk.Label(change_frame, text="Кнопка Изменить:", font=self.main_window.default_font).pack(side=tk.LEFT)
         self.change_coord_var = tk.StringVar(value="Не установлена")
-        ttk.Label(change_frame, textvariable=self.change_coord_var, foreground="blue").pack(side=tk.LEFT, padx=(5, 10))
+        ttk.Label(change_frame, textvariable=self.change_coord_var, foreground="blue", font=self.main_window.default_font).pack(side=tk.LEFT, padx=(5, 10))
         ttk.Button(change_frame, text="Установить кнопку Изменить", command=self.set_change_button).pack(side=tk.LEFT)
 
         # Секция определения областей
-        area_frame = ttk.LabelFrame(content_frame, text="Области OCR", padding="5")
-        area_frame.pack(fill=tk.X, pady=(0, 10))
+        area_frame = ttk.LabelFrame(content_frame, text="Области OCR", padding="10")
+        area_frame.pack(fill=tk.X, pady=(0, 15))
 
         # Строка области статов
         stats_area_row = ttk.Frame(area_frame)
-        stats_area_row.pack(fill=tk.X, pady=2)
+        stats_area_row.pack(fill=tk.X, pady=5)
 
         self.btn_define_area = ttk.Button(stats_area_row, text="Определить область OCR (Статы)", command=self.define_area)
         self.btn_define_area.pack(side=tk.LEFT)
 
-        self.stats_area_status_var = ttk.Label(stats_area_row, text="❌ Не установлена", foreground="orange")
+        self.stats_area_status_var = ttk.Label(stats_area_row, text="❌ Не установлена", foreground="orange", font=self.main_window.default_font)
         self.stats_area_status_var.pack(side=tk.LEFT, padx=(10, 0))
 
         # Строка области ранга
         grade_area_row = ttk.Frame(area_frame)
-        grade_area_row.pack(fill=tk.X, pady=2)
+        grade_area_row.pack(fill=tk.X, pady=5)
 
         self.btn_define_grade_area = ttk.Button(grade_area_row, text="Определить область OCR (Ранг)", command=self.define_grade_area)
         self.btn_define_grade_area.pack(side=tk.LEFT)
@@ -105,43 +105,43 @@ class ArrivalTab:
         info_button = ttk.Button(grade_area_row, text="ℹ️", width=3, command=self.show_grade_area_info)
         info_button.pack(side=tk.LEFT, padx=(5, 0))
 
-        self.grade_area_status_var = ttk.Label(grade_area_row, text="Опционально: Не установлена (Требуется для 'Перезарядка навыка Крыльев Силы')", foreground="gray")
+        self.grade_area_status_var = ttk.Label(grade_area_row, text="Опционально: Не установлена (Требуется для 'Перезарядка навыка Крыльев Силы')", foreground="gray", font=self.main_window.default_font)
         self.grade_area_status_var.pack(side=tk.LEFT, padx=(10, 0))
 
         # Секция выбора статов
-        stats_frame = ttk.LabelFrame(content_frame, text="Желаемые статы", padding="5")
-        stats_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+        stats_frame = ttk.LabelFrame(content_frame, text="Желаемые статы", padding="10")
+        stats_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
         
         # Выбор логики (AND/OR между атакующими и защитными)
         logic_frame = ttk.Frame(stats_frame)
-        logic_frame.pack(fill=tk.X, pady=(0, 5))
-        ttk.Label(logic_frame, text="Логика между Атакующими и Защитными:").pack(anchor=tk.W, pady=(0, 3))
+        logic_frame.pack(fill=tk.X, pady=(0, 10))
+        ttk.Label(logic_frame, text="Логика между Атакующими и Защитными:", font=self.main_window.default_font).pack(anchor=tk.W, pady=(0, 5))
         self.logic_var = tk.StringVar(value="OR")  # По умолчанию OR
         ttk.Radiobutton(logic_frame, text="OR (может совпадать любая категория)", variable=self.logic_var, value="OR").pack(anchor=tk.W, padx=(20, 0))
         ttk.Radiobutton(logic_frame, text="AND (должны совпадать обе категории)", variable=self.logic_var, value="AND").pack(anchor=tk.W, padx=(20, 0))
 
         # Секция атакующих статов
-        off_stats_frame = ttk.LabelFrame(stats_frame, text="Атакующие статы (логика OR)", padding="5")
-        off_stats_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 5))
+        off_stats_frame = ttk.LabelFrame(stats_frame, text="Атакующие статы (логика OR)", padding="10")
+        off_stats_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
 
         # Фрейм добавления атакующего стата и выпадающего списка
         add_off_stat_frame = ttk.Frame(off_stats_frame)
-        add_off_stat_frame.pack(fill=tk.X, pady=(0, 5))
+        add_off_stat_frame.pack(fill=tk.X, pady=(0, 10))
         
-        ttk.Label(add_off_stat_frame, text="Выберите стат:").pack(side=tk.LEFT)
+        ttk.Label(add_off_stat_frame, text="Выберите стат:", font=self.main_window.default_font).pack(side=tk.LEFT)
         off_skills = get_offensive_skills() + ["Свой"]
-        self.combo_off_stat_selector = ttk.Combobox(add_off_stat_frame, values=off_skills, state="readonly", width=20)
-        self.combo_off_stat_selector.pack(side=tk.LEFT, padx=(5, 5))
+        self.combo_off_stat_selector = ttk.Combobox(add_off_stat_frame, values=off_skills, state="readonly", width=25)
+        self.combo_off_stat_selector.pack(side=tk.LEFT, padx=(5, 10))
         self.combo_off_stat_selector.bind("<<ComboboxSelected>>", self.on_off_stat_selected)
         ttk.Button(add_off_stat_frame, text="Добавить стат", command=self.add_offensive_stat).pack(side=tk.LEFT)
         
         # Поля ввода своего атакующего стата (скрыты по умолчанию)
         self.custom_off_frame = ttk.Frame(add_off_stat_frame)
-        ttk.Label(self.custom_off_frame, text="Свое название:").pack(side=tk.LEFT)
-        self.custom_off_name_entry = ttk.Entry(self.custom_off_frame, width=15)
-        self.custom_off_name_entry.pack(side=tk.LEFT, padx=(5, 5))
-        ttk.Label(self.custom_off_frame, text="Мин. значение:").pack(side=tk.LEFT)
-        self.custom_off_value_entry = ttk.Entry(self.custom_off_frame, width=8)
+        ttk.Label(self.custom_off_frame, text="Свое название:", font=self.main_window.default_font).pack(side=tk.LEFT)
+        self.custom_off_name_entry = ttk.Entry(self.custom_off_frame, width=20)
+        self.custom_off_name_entry.pack(side=tk.LEFT, padx=(5, 10))
+        ttk.Label(self.custom_off_frame, text="Мин. значение:", font=self.main_window.default_font).pack(side=tk.LEFT)
+        self.custom_off_value_entry = ttk.Entry(self.custom_off_frame, width=10)
         self.custom_off_value_entry.pack(side=tk.LEFT, padx=(5, 0))
         self.custom_off_frame.pack_forget()  # Скрыть изначально
         
@@ -150,7 +150,7 @@ class ArrivalTab:
         off_stats_container_frame.pack(fill=tk.BOTH, expand=True)
         
         # Создание canvas и scrollbar для прокручиваемого списка атакующих статов
-        off_canvas = tk.Canvas(off_stats_container_frame, height=100)
+        off_canvas = tk.Canvas(off_stats_container_frame, height=120)
         off_scrollbar = ttk.Scrollbar(off_stats_container_frame, orient="vertical", command=off_canvas.yview)
         self.off_stats_scrollable_frame = ttk.Frame(off_canvas)
         
@@ -166,27 +166,27 @@ class ArrivalTab:
         off_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         # Секция защитных статов
-        def_stats_frame = ttk.LabelFrame(stats_frame, text="Защитные статы (логика OR)", padding="5")
-        def_stats_frame.pack(fill=tk.BOTH, expand=True, pady=(5, 0))
+        def_stats_frame = ttk.LabelFrame(stats_frame, text="Защитные статы (логика OR)", padding="10")
+        def_stats_frame.pack(fill=tk.BOTH, expand=True, pady=(10, 0))
 
         # Фрейм добавления защитного стата и выпадающего списка
         add_def_stat_frame = ttk.Frame(def_stats_frame)
-        add_def_stat_frame.pack(fill=tk.X, pady=(0, 5))
+        add_def_stat_frame.pack(fill=tk.X, pady=(0, 10))
         
-        ttk.Label(add_def_stat_frame, text="Выберите стат:").pack(side=tk.LEFT)
+        ttk.Label(add_def_stat_frame, text="Выберите стат:", font=self.main_window.default_font).pack(side=tk.LEFT)
         def_skills = get_defensive_skills() + ["Свой"]
-        self.combo_def_stat_selector = ttk.Combobox(add_def_stat_frame, values=def_skills, state="readonly", width=20)
-        self.combo_def_stat_selector.pack(side=tk.LEFT, padx=(5, 5))
+        self.combo_def_stat_selector = ttk.Combobox(add_def_stat_frame, values=def_skills, state="readonly", width=25)
+        self.combo_def_stat_selector.pack(side=tk.LEFT, padx=(5, 10))
         self.combo_def_stat_selector.bind("<<ComboboxSelected>>", self.on_def_stat_selected)
         ttk.Button(add_def_stat_frame, text="Добавить стат", command=self.add_defensive_stat).pack(side=tk.LEFT)
         
         # Поля ввода своего защитного стата (скрыты по умолчанию)
         self.custom_def_frame = ttk.Frame(add_def_stat_frame)
-        ttk.Label(self.custom_def_frame, text="Свое название:").pack(side=tk.LEFT)
-        self.custom_def_name_entry = ttk.Entry(self.custom_def_frame, width=15)
-        self.custom_def_name_entry.pack(side=tk.LEFT, padx=(5, 5))
-        ttk.Label(self.custom_def_frame, text="Мин. значение:").pack(side=tk.LEFT)
-        self.custom_def_value_entry = ttk.Entry(self.custom_def_frame, width=8)
+        ttk.Label(self.custom_def_frame, text="Свое название:", font=self.main_window.default_font).pack(side=tk.LEFT)
+        self.custom_def_name_entry = ttk.Entry(self.custom_def_frame, width=20)
+        self.custom_def_name_entry.pack(side=tk.LEFT, padx=(5, 10))
+        ttk.Label(self.custom_def_frame, text="Мин. значение:", font=self.main_window.default_font).pack(side=tk.LEFT)
+        self.custom_def_value_entry = ttk.Entry(self.custom_def_frame, width=10)
         self.custom_def_value_entry.pack(side=tk.LEFT, padx=(5, 0))
         self.custom_def_frame.pack_forget()  # Скрыть изначально
         
@@ -195,7 +195,7 @@ class ArrivalTab:
         def_stats_container_frame.pack(fill=tk.BOTH, expand=True)
         
         # Создание canvas и scrollbar для прокручиваемого списка защитных статов
-        def_canvas = tk.Canvas(def_stats_container_frame, height=100)
+        def_canvas = tk.Canvas(def_stats_container_frame, height=120)
         def_scrollbar = ttk.Scrollbar(def_stats_container_frame, orient="vertical", command=def_canvas.yview)
         self.def_stats_scrollable_frame = ttk.Frame(def_canvas)
         
@@ -329,29 +329,29 @@ class ArrivalTab:
         
         # Create frame for this stat entry
         stat_frame = ttk.Frame(self.off_stats_scrollable_frame)
-        stat_frame.pack(fill=tk.X, pady=2)
+        stat_frame.pack(fill=tk.X, pady=5)
         
         # Stat name label
-        ttk.Label(stat_frame, text=stat_name, width=20).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Label(stat_frame, text=stat_name, width=25, font=self.main_window.default_font).pack(side=tk.LEFT, padx=(0, 10))
         
         # Min value dropdown or entry
-        ttk.Label(stat_frame, text="Min:").pack(side=tk.LEFT)
+        ttk.Label(stat_frame, text="Min:", font=self.main_window.default_font).pack(side=tk.LEFT)
         min_var = tk.StringVar()
         if custom_value is not None:
             # Custom stat - use entry field
             min_var.set(custom_value)
-            min_value_widget = ttk.Label(stat_frame, text=custom_value, width=8)
-            min_value_widget.pack(side=tk.LEFT, padx=(2, 5))
+            min_value_widget = ttk.Label(stat_frame, text=custom_value, width=8, font=self.main_window.default_font)
+            min_value_widget.pack(side=tk.LEFT, padx=(5, 10))
         elif stat_name in VALUE_COLLISION_STATS:
             variations = GRADE_OPTIONS
-            min_value_dropdown = ttk.Combobox(stat_frame, textvariable=min_var, values=variations, state="readonly", width=8)
-            min_value_dropdown.pack(side=tk.LEFT, padx=(2, 5))
+            min_value_dropdown = ttk.Combobox(stat_frame, textvariable=min_var, values=variations, state="readonly", width=10)
+            min_value_dropdown.pack(side=tk.LEFT, padx=(5, 10))
             if variations:
                 min_var.set(variations[0])  # Select first variation by default
         else:
             variations = get_stat_variations(stat_name)
-            min_value_dropdown = ttk.Combobox(stat_frame, textvariable=min_var, values=variations, state="readonly", width=8)
-            min_value_dropdown.pack(side=tk.LEFT, padx=(2, 5))
+            min_value_dropdown = ttk.Combobox(stat_frame, textvariable=min_var, values=variations, state="readonly", width=10)
+            min_value_dropdown.pack(side=tk.LEFT, padx=(5, 10))
             if variations:
                 min_var.set(variations[0])  # Select first variation by default
         
@@ -404,29 +404,29 @@ class ArrivalTab:
         
         # Create frame for this stat entry
         stat_frame = ttk.Frame(self.def_stats_scrollable_frame)
-        stat_frame.pack(fill=tk.X, pady=2)
+        stat_frame.pack(fill=tk.X, pady=5)
         
         # Stat name label
-        ttk.Label(stat_frame, text=stat_name, width=20).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Label(stat_frame, text=stat_name, width=25, font=self.main_window.default_font).pack(side=tk.LEFT, padx=(0, 10))
         
         # Min value dropdown or entry
-        ttk.Label(stat_frame, text="Min:").pack(side=tk.LEFT)
+        ttk.Label(stat_frame, text="Min:", font=self.main_window.default_font).pack(side=tk.LEFT)
         min_var = tk.StringVar()
         if custom_value is not None:
             # Custom stat - use entry field
             min_var.set(custom_value)
-            min_value_widget = ttk.Label(stat_frame, text=custom_value, width=8)
-            min_value_widget.pack(side=tk.LEFT, padx=(2, 5))
+            min_value_widget = ttk.Label(stat_frame, text=custom_value, width=8, font=self.main_window.default_font)
+            min_value_widget.pack(side=tk.LEFT, padx=(5, 10))
         elif stat_name in VALUE_COLLISION_STATS:
             variations = GRADE_OPTIONS
-            min_value_dropdown = ttk.Combobox(stat_frame, textvariable=min_var, values=variations, state="readonly", width=8)
-            min_value_dropdown.pack(side=tk.LEFT, padx=(2, 5))
+            min_value_dropdown = ttk.Combobox(stat_frame, textvariable=min_var, values=variations, state="readonly", width=10)
+            min_value_dropdown.pack(side=tk.LEFT, padx=(5, 10))
             if variations:
                 min_var.set(variations[0])  # Select first variation by default
         else:
             variations = get_stat_variations(stat_name)
-            min_value_dropdown = ttk.Combobox(stat_frame, textvariable=min_var, values=variations, state="readonly", width=8)
-            min_value_dropdown.pack(side=tk.LEFT, padx=(2, 5))
+            min_value_dropdown = ttk.Combobox(stat_frame, textvariable=min_var, values=variations, state="readonly", width=10)
+            min_value_dropdown.pack(side=tk.LEFT, padx=(5, 10))
             if variations:
                 min_var.set(variations[0])  # Select first variation by default
         

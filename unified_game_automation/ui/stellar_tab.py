@@ -30,106 +30,154 @@ class StellarTab:
 
         # Создание UI
         self.create_ui()
-        
+
         # Загрузка сохраненных настроек
         self.load_saved_settings()
 
     def create_ui(self):
         """Создание UI вкладки Звездная Россыпь"""
-        # Главный фрейм с отступами
-        main_frame = ttk.Frame(self.parent_frame, padding="10")
+        # Главный фрейм с увеличенными отступами
+        main_frame = ttk.Frame(self.parent_frame, padding="20")
         main_frame.pack(fill=tk.BOTH, expand=True)
 
         # Фрейм контента, который может сжиматься (все кроме кнопок)
         content_frame = ttk.Frame(main_frame)
         content_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Секция координат кнопок
-        coord_frame = ttk.LabelFrame(content_frame, text="Координаты кнопок", padding="5")
-        coord_frame.pack(fill=tk.X, pady=(0, 10))
+        # ====== СЕКЦИЯ 1: КНОПКИ ======
+        button_section = ttk.LabelFrame(content_frame, text="🎯 Кнопка управления", padding="15")
+        button_section.pack(fill=tk.X, pady=(0, 15))
 
         # Координаты кнопки Запечатлеть
-        imprint_frame = ttk.Frame(coord_frame)
-        imprint_frame.pack(fill=tk.X, pady=2)
+        imprint_frame = ttk.Frame(button_section)
+        imprint_frame.pack(fill=tk.X, pady=5)
 
-        ttk.Label(imprint_frame, text="Кнопка Запечатлеть:").pack(side=tk.LEFT)
+        ttk.Label(imprint_frame, text="Кнопка Запечатлеть:", 
+                 font=self.main_window.default_font).pack(side=tk.LEFT)
         self.imprint_coord_var = tk.StringVar(value="Не установлена")
-        ttk.Label(imprint_frame, textvariable=self.imprint_coord_var, foreground="blue").pack(side=tk.LEFT, padx=(5, 0))
-        ttk.Button(imprint_frame, text="Установить кнопку Запечатлеть", command=self.set_imprint_button).pack(side=tk.RIGHT)
-
-        # Секция выбора статов
-        option_frame = ttk.LabelFrame(content_frame, text="Конфигурация статов (логика OR)", padding="5")
-        option_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
-
-        # Кнопка добавления стата и выпадающий список
-        add_stat_frame = ttk.Frame(option_frame)
-        add_stat_frame.pack(fill=tk.X, pady=(0, 5))
         
-        ttk.Label(add_stat_frame, text="Выберите стат:").pack(side=tk.LEFT)
+        # Индикатор статуса с цветом
+        self.imprint_status_indicator = ttk.Label(imprint_frame, text="●",
+                                                 foreground=self.main_window.colors['warning'],
+                                                 font=("Segoe UI", 12))
+        self.imprint_status_indicator.pack(side=tk.LEFT, padx=(8, 0))
+        
+        ttk.Label(imprint_frame, textvariable=self.imprint_coord_var, 
+                 foreground=self.main_window.colors['accent'], 
+                 font=self.main_window.default_font).pack(side=tk.LEFT, padx=(8, 0))
+        ttk.Button(imprint_frame, text="📍 Установить", 
+                  command=self.set_imprint_button).pack(side=tk.RIGHT)
+
+        # ====== СЕКЦИЯ 2: ОБЛАСТЬ OCR ======
+        ocr_section = ttk.LabelFrame(content_frame, text="📷 Область распознавания", padding="15")
+        ocr_section.pack(fill=tk.X, pady=(0, 15))
+
+        ocr_content = ttk.Frame(ocr_section)
+        ocr_content.pack(fill=tk.X)
+
+        self.btn_define_area = ttk.Button(ocr_content, text="📐 Выбрать область", 
+                                         command=self.define_area)
+        self.btn_define_area.pack(side=tk.LEFT, padx=(0, 10))
+
+        # Статус области
+        self.area_status_var = tk.StringVar(value="Не определена")
+        self.area_status_label = ttk.Label(ocr_content, textvariable=self.area_status_var,
+                                          foreground=self.main_window.colors['warning'],
+                                          font=self.main_window.default_font)
+        self.area_status_label.pack(side=tk.LEFT)
+
+        # Подсказка
+        area_hint = ttk.Label(ocr_content, 
+                             text="💡 Выделите область на экране, где отображаются статы",
+                             foreground=self.main_window.colors['text_secondary'],
+                             font=self.main_window.default_font)
+        area_hint.pack(side=tk.LEFT, padx=(20, 0))
+
+        # ====== СЕКЦИЯ 3: СТАТЫ ======
+        stats_section = ttk.LabelFrame(content_frame, text="⭐ Желаемые статы (логика ИЛИ)",
+                                       padding="15")
+        stats_section.pack(fill=tk.X, pady=(0, 15))
+
+        # Панель добавления статов
+        add_stat_panel = ttk.Frame(stats_section)
+        add_stat_panel.pack(fill=tk.X, pady=(0, 10))
+
+        ttk.Label(add_stat_panel, text="Стат:", 
+                 font=self.main_window.default_font).pack(side=tk.LEFT)
         stellar_options = get_stellar_options() + ["Свой"]
-        self.combo_stat_selector = ttk.Combobox(add_stat_frame, values=stellar_options, state="readonly", width=20)
-        self.combo_stat_selector.pack(side=tk.LEFT, padx=(5, 5))
+        self.combo_stat_selector = ttk.Combobox(add_stat_panel, values=stellar_options, 
+                                               state="readonly", width=28)
+        self.combo_stat_selector.pack(side=tk.LEFT, padx=(5, 10))
         self.combo_stat_selector.bind("<<ComboboxSelected>>", self.on_stat_selected)
-        ttk.Button(add_stat_frame, text="Добавить стат", command=self.add_stat).pack(side=tk.LEFT)
-        
+        ttk.Button(add_stat_panel, text="➕ Добавить", 
+                  command=self.add_stat).pack(side=tk.LEFT)
+
         # Поля ввода своего стата (скрыты по умолчанию)
-        self.custom_frame = ttk.Frame(add_stat_frame)
-        self.custom_frame.pack(fill=tk.X, pady=(5, 0))
+        self.custom_frame = ttk.Frame(add_stat_panel)
+        self.custom_frame.pack(side=tk.LEFT, padx=(10, 0))
         
-        ttk.Label(self.custom_frame, text="Свое название:").pack(side=tk.LEFT)
-        self.custom_name_entry = ttk.Entry(self.custom_frame, width=15)
+        ttk.Label(self.custom_frame, text="Название:", 
+                 font=self.main_window.default_font).pack(side=tk.LEFT)
+        self.custom_name_entry = ttk.Entry(self.custom_frame, width=20)
         self.custom_name_entry.pack(side=tk.LEFT, padx=(5, 5))
-        
-        ttk.Label(self.custom_frame, text="Мин. значение:").pack(side=tk.LEFT)
+
         self.custom_value_entry = ttk.Entry(self.custom_frame, width=8)
         self.custom_value_entry.pack(side=tk.LEFT, padx=(5, 0))
-        
         self.custom_frame.pack_forget()  # Скрыть изначально
-        
+
         # Контейнер для записей статов с прокруткой
-        # Сохраняем чтобы вставить UI своего стата перед контейнером списка
-        self.stats_container_frame = ttk.Frame(option_frame)
-        self.stats_container_frame.pack(fill=tk.BOTH, expand=True)
-        
+        self.stats_container_frame = ttk.Frame(stats_section)
+        self.stats_container_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+
         # Создание canvas и scrollbar для прокручиваемого списка статов
-        canvas = tk.Canvas(self.stats_container_frame, height=150)
-        scrollbar = ttk.Scrollbar(self.stats_container_frame, orient="vertical", command=canvas.yview)
+        canvas = tk.Canvas(self.stats_container_frame, height=150,
+                          highlightthickness=0)
+        scrollbar = ttk.Scrollbar(self.stats_container_frame, orient="vertical",
+                                 command=canvas.yview)
         self.stats_scrollable_frame = ttk.Frame(canvas)
-        
+
         self.stats_scrollable_frame.bind(
             "<Configure>",
             lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
         )
-        
+
         canvas.create_window((0, 0), window=self.stats_scrollable_frame, anchor="nw")
         canvas.configure(yscrollcommand=scrollbar.set)
-        
+
         canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        
 
-        # Секция настроек визуального эффекта
-        effect_frame = ttk.LabelFrame(content_frame, text="Настройки визуального эффекта", padding="5")
-        effect_frame.pack(fill=tk.X, pady=(0, 10))
+        # Информационная подсказка
+        stats_hint = ttk.Label(stats_section,
+                              text="💡 Остановится когда найдёт ХОТЯ БЫ ОДИН из добавленных статов",
+                              foreground=self.main_window.colors['text_secondary'],
+                              font=self.main_window.default_font)
+        stats_hint.pack(fill=tk.X, pady=(10, 0))
 
+        # ====== СЕКЦИЯ 4: ЗАДЕРЖКА ======
+        delay_section = ttk.LabelFrame(content_frame, text="⏱ Задержка после эффекта",
+                                       padding="15")
+        delay_section.pack(fill=tk.X, pady=(0, 15))
 
-        # Настройка задержки
-        delay_frame = ttk.Frame(effect_frame)
-        delay_frame.pack(fill=tk.X, pady=2)
+        delay_panel = ttk.Frame(delay_section)
+        delay_panel.pack(fill=tk.X, pady=5)
 
-        ttk.Label(delay_frame, text="Задержка очистки эффекта:").pack(side=tk.LEFT)
-        self.entry_effect_delay = ttk.Entry(delay_frame, width=8)
-        self.entry_effect_delay.pack(side=tk.LEFT, padx=(5, 0))
+        ttk.Label(delay_panel, text="Задержка:",
+                 font=self.main_window.default_font).pack(side=tk.LEFT, padx=(0, 5))
+        self.entry_effect_delay = ttk.Entry(delay_panel, width=10,
+                                           font=self.main_window.default_font)
+        self.entry_effect_delay.pack(side=tk.LEFT, padx=(0, 5))
         self.entry_effect_delay.insert(0, "1000")  # По умолчанию 1000мс = 1 секунда
         self.entry_effect_delay.bind("<KeyRelease>", lambda e: self.save_effect_delay())
-        ttk.Label(delay_frame, text="мс", font=("Arial", 8), foreground="gray").pack(side=tk.LEFT, padx=(5, 0))
+        ttk.Label(delay_panel, text="мс",
+                 font=self.main_window.default_font,
+                 foreground=self.main_window.colors['text_secondary']).pack(side=tk.LEFT, padx=(0, 15))
 
-        # Определение области
-        area_frame = ttk.Frame(content_frame)
-        area_frame.pack(fill=tk.X, pady=(0, 10))
-
-        self.btn_define_area = ttk.Button(area_frame, text="Определить область", command=self.define_area)
-        self.btn_define_area.pack()
+        delay_hint = ttk.Label(delay_panel,
+                              text="💡 Время ожидания после применения эффекта",
+                              foreground=self.main_window.colors['text_secondary'],
+                              font=self.main_window.default_font)
+        delay_hint.pack(side=tk.LEFT)
 
     def add_stat(self):
         """Добавление стата с минимальным значением в список"""
@@ -160,15 +208,15 @@ class StellarTab:
         
         # Создание фрейма для этого стата
         stat_frame = ttk.Frame(self.stats_scrollable_frame)
-        stat_frame.pack(fill=tk.X, pady=2)
+        stat_frame.pack(fill=tk.X, pady=5)
         
         # Метка названия стата
-        ttk.Label(stat_frame, text=stat_name, width=20).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Label(stat_frame, text=stat_name, width=25, font=self.main_window.default_font).pack(side=tk.LEFT, padx=(0, 10))
         
         # Поле ввода мин. значения
-        ttk.Label(stat_frame, text="Мин:").pack(side=tk.LEFT)
-        min_value_entry = ttk.Entry(stat_frame, width=8)
-        min_value_entry.pack(side=tk.LEFT, padx=(2, 5))
+        ttk.Label(stat_frame, text="Мин:", font=self.main_window.default_font).pack(side=tk.LEFT)
+        min_value_entry = ttk.Entry(stat_frame, width=10)
+        min_value_entry.pack(side=tk.LEFT, padx=(5, 10))
         if min_value:  # Предзаполнение если свой стат имел значение
             min_value_entry.insert(0, min_value)
         
@@ -219,9 +267,11 @@ class StellarTab:
             self.imprint_button_coords = (rel_x, rel_y)
             self.automation.set_imprint_button(self.imprint_button_coords)
             self.imprint_coord_var.set(f"({rel_x}, {rel_y})")
+            # Обновление индикатора статуса
+            self.imprint_status_indicator.configure(foreground=self.main_window.colors['success'])
             # Сохранение в настройки
             self.settings.set_button("imprint_button", (rel_x, rel_y))
-        
+
         self.main_window.capture_button_coordinates(
             "Запечатлеть",
             "Нажмите на кнопку 'Запечатлеть' в окне игры.\n"
@@ -239,17 +289,19 @@ class StellarTab:
             """Обратный вызов при выборе области"""
             self.area = area
             self.automation.set_area(area)
+            self.area_status_var.set(f"✓ Область задана: {area[0]}x{area[1]}+{area[2]}+{area[3]}")
+            self.area_status_label.configure(foreground=self.main_window.colors['success'])
             self.main_window.update_status(f"Область определена: {area}")
             # Сохранение в настройки
             self.settings.set_area("ocr_area", area)
             self.main_window.update_unified_buttons()
-        
+
         self.main_window.define_ocr_area(area_callback)
 
     def start_automation(self):
         """Start the stellar automation"""
         # Check if another tool is running
-        if not self.main_window.set_running_tool("Stellar System"):
+        if not self.main_window.set_running_tool("Звездная Россыпь"):
             return
 
         # Get configuration - stats with individual minimum values
@@ -314,19 +366,23 @@ class StellarTab:
         if area:
             self.area = area
             self.automation.set_area(area)
-        
+            self.area_status_var.set(f"✓ Область задана: {area[0]}x{area[1]}+{area[2]}+{area[3]}")
+            self.area_status_label.configure(foreground=self.main_window.colors['success'])
+
         # Load imprint button
         imprint_coords = self.settings.get_button("imprint_button")
         if imprint_coords:
             self.imprint_button_coords = imprint_coords
             self.automation.set_imprint_button(imprint_coords)
             self.imprint_coord_var.set(f"({imprint_coords[0]}, {imprint_coords[1]})")
-        
+            # Обновление индикатора статуса
+            self.imprint_status_indicator.configure(foreground=self.main_window.colors['success'])
+
         # Load effect delay
         effect_delay = self.settings.get_custom("effect_delay_ms", 1000)
         self.entry_effect_delay.delete(0, tk.END)
         self.entry_effect_delay.insert(0, str(effect_delay))
-        
+
         # Load stat entries
         stat_entries_data = self.settings.get_custom("stat_entries", [])
         for stat_data in stat_entries_data:
@@ -335,28 +391,27 @@ class StellarTab:
             if stat_name:
                 # Create frame for this stat entry
                 stat_frame = ttk.Frame(self.stats_scrollable_frame)
-                stat_frame.pack(fill=tk.X, pady=2)
-                
+                stat_frame.pack(fill=tk.X, pady=5)
+
                 # Stat name label
-                ttk.Label(stat_frame, text=stat_name, width=20).pack(side=tk.LEFT, padx=(0, 5))
-                
+                ttk.Label(stat_frame, text=stat_name, width=25, font=self.main_window.default_font).pack(side=tk.LEFT, padx=(0, 10))
+
                 # Min value entry
-                ttk.Label(stat_frame, text="Min:").pack(side=tk.LEFT)
-                min_value_entry = ttk.Entry(stat_frame, width=8)
-                min_value_entry.pack(side=tk.LEFT, padx=(2, 5))
+                ttk.Label(stat_frame, text="Min:", font=self.main_window.default_font).pack(side=tk.LEFT)
+                min_value_entry = ttk.Entry(stat_frame, width=10)
+                min_value_entry.pack(side=tk.LEFT, padx=(5, 10))
                 if min_value:
                     min_value_entry.insert(0, min_value)
-                
+
                 # Remove button (use default parameter trick to avoid closure issues)
-                remove_btn = ttk.Button(stat_frame, text="Remove",
+                remove_btn = ttk.Button(stat_frame, text="Удалить",
                                        command=lambda s=stat_name, f=stat_frame: self.remove_stat(s, f))
                 remove_btn.pack(side=tk.LEFT)
-                
+
                 # Store the entry
                 self.stat_entries.append((stat_name, min_value_entry, stat_frame))
 
     def emergency_stop(self):
-        """Emergency stop the automation"""
-        self.automation.emergency_stop()
+        self.automation.stop()
         self.main_window.clear_running_tool()
 

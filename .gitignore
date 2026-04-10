@@ -2,87 +2,37 @@
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
+*.pyo
 *.egg-info/
-.installed.cfg
 *.egg
+dist/
+build/
+*.spec.bak
 
-# Virtual environments
+# Virtual environment
 venv/
 env/
 ENV/
-.venv/
-.env/
 
 # IDE
-.vscode/
 .idea/
+.vscode/
 *.swp
 *.swo
-
-# Logs
-*.log
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Coverage
-.coverage
-htmlcov/
-.coverage.*
-.cov
+# Logs
+*.log
+stellar_automation_log.txt
+error.txt
+run_log.txt
 
-# Temporary files
-*.tmp
-*.temp
+# User settings (contains coordinates, may be personal)
+settings.json
 
-# Environment files
-.env
-.env.local
-*.env.*
-
-# MyPy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pytest
-.pytest_cache/
-
-# Compressed files
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
+# Build scripts helpers
+create_icon.py
+create_ico.py
