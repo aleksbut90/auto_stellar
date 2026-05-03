@@ -1,0 +1,640 @@
+{
+  "scenarios": [
+    {
+      "name": "вход",
+      "enabled": true,
+      "trigger": {
+        "type": "template",
+        "template": "templates/Stsenariy_trigger.png",
+        "threshold": 0.75,
+        "search_area": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "templates": [
+          "templates/Stsenariy_trigger.png"
+        ]
+      },
+      "actions": [
+        {
+          "type": "mouse_move",
+          "x": 0.443,
+          "y": 0.423,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "mouse_click",
+          "button": "left"
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "mouse_move",
+          "x": 0.56,
+          "y": 0.826,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "mouse_click",
+          "button": "left"
+        },
+        {
+          "type": "mouse_move",
+          "x": 0.442,
+          "y": 0.709,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "mouse_click",
+          "button": "left"
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "mouse_move",
+          "x": 0.5,
+          "y": 0.502,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "mouse_down",
+          "button": "right"
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "mouse_move",
+          "x": 0.433,
+          "y": 0.49,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "mouse_up",
+          "button": "right"
+        },
+        {
+          "type": "mouse_move",
+          "x": 0.5,
+          "y": 0.355,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "e"
+        },
+        {
+          "type": "mouse_move",
+          "x": 0.381,
+          "y": 0.569,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "q"
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "e"
+        },
+        {
+          "type": "mouse_move",
+          "x": 0.499,
+          "y": 0.331,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "q"
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "e"
+        },
+        {
+          "type": "mouse_move",
+          "x": 0.397,
+          "y": 0.319,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "q"
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "e"
+        },
+        {
+          "type": "mouse_move",
+          "x": 0.5,
+          "y": 0.505,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "mouse_down",
+          "button": "right"
+        },
+        {
+          "type": "mouse_move",
+          "x": 0.364,
+          "y": 0.442,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "mouse_up",
+          "button": "right"
+        },
+        {
+          "type": "mouse_move",
+          "x": 0.57,
+          "y": 0.322,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "e"
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "q"
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "e"
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "q"
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "e"
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "z"
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "F1"
+        },
+        {
+          "type": "key_press",
+          "key": "2"
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "-"
+        },
+        {
+          "type": "key_press",
+          "key": "-"
+        },
+        {
+          "type": "mouse_move",
+          "x": 0.499,
+          "y": 0.495,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "mouse_down",
+          "button": "right"
+        },
+        {
+          "type": "mouse_move",
+          "x": 0.494,
+          "y": 0.578,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "mouse_move",
+          "x": 0.522,
+          "y": 0.578,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "mouse_up",
+          "button": "right"
+        },
+        {
+          "type": "mouse_move",
+          "x": 0.489,
+          "y": 0.17,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "e"
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "q"
+        },
+        {
+          "type": "key_press",
+          "key": "e"
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "q"
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "e"
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        }
+      ],
+      "repeat": false,
+      "delay": 1.0,
+      "templates": [
+        "templates/Stsenariy_trigger.png"
+      ]
+    },
+    {
+      "name": "ликанус",
+      "enabled": true,
+      "trigger": {
+        "type": "template",
+        "template": "templates/likanus_20260417_235807_trigger.png",
+        "threshold": 0.75,
+        "search_area": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "templates": [
+          "templates/likanus_20260417_235807_trigger.png",
+          "C:/Users/AlexButov/OpenideProjects/auto_stellar/templates/likanus_20260418_000641_trigger.png"
+        ]
+      },
+      "actions": [
+        {
+          "type": "mouse_move",
+          "x": 0.099,
+          "y": 0.134,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "mouse_right_click"
+        },
+        {
+          "type": "key_press",
+          "key": "1"
+        },
+        {
+          "type": "mouse_move",
+          "x": 0.573,
+          "y": 0.881,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "1"
+        },
+        {
+          "type": "mouse_right_click"
+        },
+        {
+          "type": "key_press",
+          "key": "z"
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "1"
+        }
+      ],
+      "repeat": true,
+      "delay": 1.0,
+      "templates": [
+        "templates/likanus_20260417_235807_trigger.png",
+        "C:/Users/AlexButov/OpenideProjects/auto_stellar/templates/likanus_20260418_000641_trigger.png"
+      ]
+    },
+    {
+      "name": "деспот",
+      "enabled": true,
+      "trigger": {
+        "type": "template",
+        "template": "templates/Stsenariy1_20260415_130305_trigger.png",
+        "threshold": 0.95,
+        "search_area": [
+          4,
+          38,
+          3413,
+          1351
+        ],
+        "templates": [
+          "templates/Stsenariy1_20260415_130305_trigger.png",
+          "templates/Stsenariy1_20260415_130409_trigger.png"
+        ]
+      },
+      "actions": [
+        {
+          "type": "mouse_move",
+          "x": 0.571,
+          "y": 0.88,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "mouse_right_click"
+        },
+        {
+          "type": "mouse_move",
+          "x": 0.471,
+          "y": 0.821,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "mouse_right_click"
+        },
+        {
+          "type": "mouse_move",
+          "x": 0.494,
+          "y": 0.822,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "mouse_right_click"
+        },
+        {
+          "type": "mouse_move",
+          "x": 0.606,
+          "y": 0.876,
+          "use_trigger_position": false,
+          "duration": 0.1
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "mouse_right_click"
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "wait",
+          "duration": 0.5
+        },
+        {
+          "type": "key_press",
+          "key": "z"
+        },
+        {
+          "type": "key_press",
+          "key": "z"
+        },
+        {
+          "type": "key_press",
+          "key": "1"
+        },
+        {
+          "type": "key_press",
+          "key": "1"
+        }
+      ],
+      "repeat": false,
+      "delay": 1.0,
+      "templates": [
+        "templates/Stsenariy1_20260415_130305_trigger.png",
+        "templates/Stsenariy1_20260415_130409_trigger.png"
+      ]
+    },
+    {
+      "name": "Сценарий_4",
+      "enabled": true,
+      "trigger": {
+        "type": "template",
+        "template": "templates/Stsenariy_4_20260415_130847_trigger.png",
+        "threshold": 0.7,
+        "search_area": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "templates": [
+          "templates/Stsenariy_4_20260415_130847_trigger.png"
+        ]
+      },
+      "actions": [],
+      "repeat": false,
+      "delay": 1.0,
+      "templates": [
+        "templates/Stsenariy_4_20260415_130847_trigger.png"
+      ]
+    }
+  ],
+  "idle_actions": [
+    {
+      "type": "key_press",
+      "key": "F3"
+    },
+    {
+      "type": "key_press",
+      "key": "2"
+    },
+    {
+      "type": "mouse_move",
+      "x": 0.591,
+      "y": 0.876,
+      "use_trigger_position": false,
+      "duration": 0.1
+    },
+    {
+      "type": "key_press",
+      "key": "2"
+    },
+    {
+      "type": "wait",
+      "duration": 0.5
+    },
+    {
+      "type": "mouse_right_click"
+    },
+    {
+      "type": "wait",
+      "duration": 0.5
+    },
+    {
+      "type": "key_press",
+      "key": "z"
+    },
+    {
+      "type": "wait",
+      "duration": 0.5
+    },
+    {
+      "type": "key_press",
+      "key": "2"
+    },
+    {
+      "type": "wait",
+      "duration": 0.5
+    },
+    {
+      "type": "key_press",
+      "key": "z"
+    },
+    {
+      "type": "key_press",
+      "key": "4"
+    }
+  ],
+  "idle_delay": 1.0
+}

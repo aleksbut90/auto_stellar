@@ -8,11 +8,13 @@ import threading
 import mouse
 from core.game_connector import GameConnector
 from core.ocr_engine import OCREngine
+from core.emergency_stop import install_emergency_hook, remove_emergency_hook, set_stop_flag
 # ОТКЛЮЧЕНО: from ui.arrival_tab import ArrivalTab
 # ОТКЛЮЧЕНО: from ui.collection_tab import CollectionTab
 # ОТКЛЮЧЕНО: from ui.heils_clicker_tab import HeilsClickerTab
 from ui.stellar_tab import StellarTab
-from ui.troubleshooting_tab import TroubleshootingTab
+from ui.avtobot_tab import AvtobotTab
+from ui.scenario_editor_tab import ScenarioEditorTab
 from ui.help_tab import HelpTab
 
 class MainWindow:
@@ -49,13 +51,24 @@ class MainWindow:
         self.game_connector = GameConnector(self.update_status)
         self.ocr_engine = OCREngine(self.update_status)
 
-        # Настройка аварийной остановки (клавиша ESC)
+        # Настройка аварийной остановки (клавиша ESC) - ДВА уровня защиты
+        self.keyboard_enabled = False
+        
+        # Уровень 1: Низкоуровневый хук Windows API (работает даже с pydirectinput)
+        try:
+            if install_emergency_hook(self.emergency_stop):
+                self.keyboard_enabled = True
+                print("✅ ESC хук уровня Windows API установлен")
+        except Exception as e:
+            print(f"⚠️ Не удалось установить низкоуровневый хук ESC: {e}")
+        
+        # Уровень 2: Стандартный хук keyboard (для резерва)
         try:
             keyboard.add_hotkey('esc', self.emergency_stop)
             self.keyboard_enabled = True
+            print("✅ Стандартный хук ESC установлен")
         except Exception as e:
             print(f"⚠️ Не удалось настроить горячую клавишу ESC (запустите от администратора): {e}")
-            self.keyboard_enabled = False
 
         # Настройка стилей
         self.configure_styles()
@@ -153,23 +166,23 @@ class MainWindow:
         # Привязка события смены вкладки для остановки автоматизации при переключении
         self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_changed)
 
-        # Создание фреймов для вкладок (ТОЛЬКО АКТИВНЫЕ)
+        # Создание фреймов для вкладок
         stellar_frame = ttk.Frame(self.notebook)
+        avtobot_frame = ttk.Frame(self.notebook)
+        scenario_frame = ttk.Frame(self.notebook)
         help_frame = ttk.Frame(self.notebook)
-        troubleshooting_frame = ttk.Frame(self.notebook)
 
-        # Добавление вкладок в книгу (только активные)
+        # Добавление вкладок в книгу
         self.notebook.add(stellar_frame, text="⭐ Звёздная Россыпь")
+        self.notebook.add(avtobot_frame, text="🤖 Автобот")
+        self.notebook.add(scenario_frame, text="🎮 Редактор сценариев")
         self.notebook.add(help_frame, text="❓ Помощь")
-        self.notebook.add(troubleshooting_frame, text="🔧 Решение Проблем")
 
-        # Create tab instances (только активные вкладки)
-        # ОТКЛЮЧЕНО: self.arrival_tab = ArrivalTab(arrival_frame, self)
+        # Создание вкладок
         self.stellar_tab = StellarTab(stellar_frame, self)
-        # ОТКЛЮЧЕНО: self.collection_tab = CollectionTab(collection_frame, self)
-        # ОТКЛЮЧЕНО: self.heils_clicker_tab = HeilsClickerTab(heils_frame, self)
+        self.avtobot_tab = AvtobotTab(avtobot_frame, self)
+        self.scenario_editor_tab = ScenarioEditorTab(scenario_frame, self)
         self.help_tab = HelpTab(help_frame, self)
-        self.troubleshooting_tab = TroubleshootingTab(troubleshooting_frame, self)
 
         # Update unified buttons after all tabs are loaded
         self.update_unified_buttons()
@@ -227,16 +240,15 @@ class MainWindow:
         """Получение экземпляра текущей выбранной вкладки"""
         try:
             selected_index = self.notebook.index(self.notebook.select())
-            # Только активные вкладки: Stellar, Help, Troubleshooting
             tabs = [
                 self.stellar_tab,
-                self.help_tab,
-                self.troubleshooting_tab
+                self.avtobot_tab,
+                self.scenario_editor_tab,
+                self.help_tab
             ]
             if 0 <= selected_index < len(tabs):
                 return tabs[selected_index]
         except (AttributeError, tk.TclError):
-            # Вкладки еще не полностью инициализированы или книга не готова
             pass
         return None
     
@@ -268,20 +280,60 @@ class MainWindow:
         self.update_unified_buttons()
     
     def unified_stop(self):
-        """Универсальный метод остановки - останавливает любую запущенную автоматизацию"""
+        """Универсальный метод остановки"""
         if not self.current_running_tool:
             return
 
-        # Остановка whichever инструмент запущен
         if self.current_running_tool == "Звездная Россыпь":
             self.stellar_tab.stop_automation()
+        elif self.current_running_tool == "Автобот":
+            self.avtobot_tab.emergency_stop()
+        elif self.current_running_tool == "Игровой бот":
+            self.game_bot_tab.stop_bot()
 
         self.clear_running_tool()
-    
+
+    def emergency_stop(self):
+        """Аварийная остановка по клавише ESC"""
+        # Создаём файл-флаг для бота (работает даже когда бот контролирует ввод)
+        set_stop_flag()
+        
+        # Немедленно очищаем все очереди ввода
+        try:
+            import ctypes
+            ctypes.windll.user32.FlushInput()
+        except:
+            pass
+
+        if self.current_running_tool:
+            self.update_status(f"🚨 АВАРИЙНАЯ ОСТАНОВКА - {self.current_running_tool} остановлен!")
+
+            if self.current_running_tool == "Звездная Россыпь":
+                self.stellar_tab.emergency_stop()
+            elif self.current_running_tool == "Автобот":
+                self.avtobot_tab.emergency_stop()
+            elif self.current_running_tool == "Игровой бот":
+                self.game_bot_tab.stop_bot()
+
+            self.clear_running_tool()
+
+            # Поднимаем окно наверх и мигаем им
+            self.root.lift()
+            self.root.attributes('-topmost', True)
+            self.root.update()
+            self.root.attributes('-topmost', False)
+            
+            # Звуковой сигнал (если доступен)
+            try:
+                import winsound
+                winsound.MessageBeep(winsound.MB_ICONHAND)
+            except:
+                pass
+
     def capture_button_coordinates(self, button_name, instruction_text, success_callback):
         """
         Общий метод для захвата координат кнопок на всех вкладках.
-        
+
         Args:
             button_name: Название кнопки (например, "Применить", "Изменить", "Запечатлеть")
             instruction_text: Текст инструкции для отображения в messagebox
@@ -339,25 +391,18 @@ class MainWindow:
         
         self.area_selector.select_area()
     
-    def emergency_stop(self):
-        """Аварийная остановка по клавише ESC"""
-        if self.current_running_tool:
-            self.update_status(f"🚨 АВАРИЙНАЯ ОСТАНОВКА - {self.current_running_tool} остановлен!")
-
-            # Остановка whichever инструмент запущен
-            if self.current_running_tool == "Звездная Россыпь":
-                self.stellar_tab.emergency_stop()
-
-            self.clear_running_tool()
-
-            # Вывод окна на передний план
-            self.root.lift()
-            self.root.attributes('-topmost', True)
-            self.root.attributes('-topmost', False)
-
     def on_closing(self):
         """Очистка при закрытии приложения"""
-        keyboard.unhook_all()  # Удаление всех хуков клавиатуры
+        # Останавливаем бота если работает
+        if hasattr(self, 'scenario_editor_tab') and self.scenario_editor_tab:
+            try:
+                self.scenario_editor_tab.stop_bot()
+            except:
+                pass
+        
+        # Удаляем хуки
+        remove_emergency_hook()
+        keyboard.unhook_all()
         self.root.destroy()
 
     def run(self):

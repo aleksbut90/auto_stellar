@@ -14,6 +14,7 @@ a = Analysis(
         'pywinauto',
         'keyboard',
         'mouse',
+        'mss',
         'win32gui',
         'win32con',
         'win32ui',
@@ -62,6 +63,6 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    onefile=True,
+    onefile=False,
     icon='app_icon.ico',
 )

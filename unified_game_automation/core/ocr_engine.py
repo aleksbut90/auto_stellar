@@ -37,20 +37,73 @@ class OCREngine:
             if image is None:
                 return ""
 
+            # Конвертируем в numpy array
             img = np.array(image)
-            gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+            
+            # DEBUG: Выводим информацию об изображении
+            print(f"📝 OCR Input: shape={img.shape}, dtype={img.dtype}, min={img.min()}, max={img.max()}")
+            
+            # Проверяем формат и конвертируем в grayscale
+            if len(img.shape) == 3:
+                if img.shape[2] == 4:  # RGBA
+                    gray = cv2.cvtColor(img, cv2.COLOR_RGBA2GRAY)
+                elif img.shape[2] == 3:  # RGB
+                    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+                else:
+                    gray = img[:,:,0]
+            else:
+                gray = img
 
-            # --- ПРОХОД №1 (обычный) ---
-            _, thresh = cv2.threshold(
-                gray, 0, 255,
+            # Увеличиваем изображение для лучшего распознавания (если太小)
+            h, w = gray.shape
+            if h < 50 or w < 100:  # Слишком маленькое
+                scale_factor = max(50/h, 100/w)
+                gray = cv2.resize(gray, None, fx=scale_factor, fy=scale_factor, 
+                                 interpolation=cv2.INTER_CUBIC)
+                print(f"📝 Upscaled: {w}x{h} -> {gray.shape[1]}x{gray.shape[0]}")
+
+            # --- ПРОХОД №1 (обычный с улучшенной предобработкой) ---
+            # Применяем Gaussian blur для удаления шума
+            blurred = cv2.GaussianBlur(gray, (3, 3), 0)
+            
+            # Адаптивная бинаризация (лучше чем Otsu для неравномерного освещения)
+            thresh = cv2.adaptiveThreshold(
+                blurred, 255,
+                cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                cv2.THRESH_BINARY,
+                11, 2
+            )
+            
+            # Также пробуем Otsu
+            _, otsu = cv2.threshold(
+                blurred, 0, 255,
                 cv2.THRESH_BINARY + cv2.THRESH_OTSU
             )
+
+            # Конвертируем обратно в PIL для Tesseract
+            thresh_pil = Image.fromarray(thresh)
+            otsu_pil = Image.fromarray(otsu)
+            
+            # OCR с разными режимами
             text1 = pytesseract.image_to_string(
-                Image.fromarray(thresh),
+                thresh_pil,
                 lang="rus+eng",
                 config="--oem 3 --psm 6"
             )
+            
+            text1_otsu = pytesseract.image_to_string(
+                otsu_pil,
+                lang="rus+eng",
+                config="--oem 3 --psm 6"
+            )
+            
+            # Выбираем лучший результат (более длинный)
+            if len(text1_otsu) > len(text1):
+                text1 = text1_otsu
+            
             text1 = self._fix_cyrillic_text(text1)
+            
+            print(f"📝 OCR Result 1: '{text1}'")
 
             # Если слово после "Связь" есть — возвращаем
             if re.search(r"связь\s+\w+", text1.lower()):
@@ -66,23 +119,29 @@ class OCREngine:
             # Морфология — расширяем тонкие буквы
             kernel = np.ones((2, 2), np.uint8)
             enhanced = cv2.dilate(enhanced, kernel, iterations=1)
+            enhanced = cv2.erode(enhanced, kernel, iterations=1)  # Возвращаем размер
 
             # OCR одной строки
+            enhanced_pil = Image.fromarray(enhanced)
             text2 = pytesseract.image_to_string(
-                Image.fromarray(enhanced),
+                enhanced_pil,
                 lang="rus+eng",
                 config="--oem 3 --psm 7"
             )
             text2 = self._fix_cyrillic_text(text2)
+            
+            print(f"📝 OCR Result 2: '{text2}'")
 
             # Вставляем найденное слово
-            if text2:
-                return text1.replace("связь", f"связь {text2}")
+            if text2 and len(text2) > len(text1):
+                return text2
 
             return text1
 
         except Exception as e:
             self.update_status(f"OCR error: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return ""
 
 
@@ -159,6 +218,9 @@ class OCREngine:
         fixed = fixed.replace("mег", "гнев")
         fixed = fixed.replace("мег", "гнев")
         fixed = fixed.replace("гневв", "гнев")
+        fixed = fixed.replace("криттурон", "крит урон")
+        fixed = fixed.replace("криттуров", "крит урон")
+        fixed = fixed.replace("критурон", "крит урон")
 
         # -----------------------------
         # 5. Фиксы слова «Тоска»
@@ -204,6 +266,9 @@ class OCREngine:
         fixed = fixed.replace("звезвыр", "звёздный")
         fixed = fixed.replace("звезд р", "звезда")
         fixed = fixed.replace("звездаа", "звезда")
+        fixed = fixed.replace("сетзвездная", "звездная")
+        fixed = fixed.replace("силе", "сила")
+        fixed = fixed.replace("гв", "+3")
 
         # -----------------------------
         # 11. Удаление мусора

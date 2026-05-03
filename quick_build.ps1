@@ -13,13 +13,17 @@ if (-not (Test-Path "venv")) {
     exit 1
 }
 
-# Step 1: Clean old build artifacts
+# Step 1: Clean old build artifacts (НО НЕ dataset!)
 Write-Host "[1/2] Cleaning old build artifacts..." -ForegroundColor Yellow
 if (Test-Path "build") {
     Remove-Item -Recurse -Force "build"
 }
-if (Test-Path "dist") {
-    Remove-Item -Recurse -Force "dist"
+# Никогда не удаляем dist/dataset!
+if (Test-Path "dist\Stellar_Automation.exe") {
+    Remove-Item -Force "dist\Stellar_Automation.exe"
+}
+if (Test-Path "dist\Stellar_Automation") {
+    Remove-Item -Recurse -Force "dist\Stellar_Automation"
 }
 Write-Host "      Build artifacts cleaned." -ForegroundColor Green
 Write-Host ""

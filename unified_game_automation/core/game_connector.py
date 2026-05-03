@@ -8,6 +8,7 @@ import win32ui
 from ctypes import windll
 from PIL import Image
 from .clicking.clicking_config import get_clicker_class, get_clicker_name
+import mss
 
 class GameConnector:
     def __init__(self, status_callback=None):
@@ -164,7 +165,7 @@ class GameConnector:
 
     def capture_area_bitblt(self, area):
         """
-        Capture a specific area using BitBlt method - works even with background windows
+        Capture a specific area - пробует mss (экран), fallback на BitBlt (окно)
         Args:
             area: Tuple of (left, top, width, height) in screen coordinates
         Returns:
@@ -172,16 +173,84 @@ class GameConnector:
         """
         if not self.game_window:
             return None
-
+        
+        # Сначала пробуем mss (работает с экранными координатами напрямую)
+        try:
+            img = self.capture_area_mss(area)
+            if img:
+                return img
+        except:
+            pass
+        
+        # Fallback на BitBlt (если mss не сработал)
         try:
             hwnd = self.game_window.handle
 
             if win32gui.IsIconic(hwnd):
                 return None
 
-            left, top, right, bottom = win32gui.GetWindowRect(hwnd)
-            width = right - left
-            height = bottom - top
+            # Получаем координаты окна
+            win_left, win_top, win_right, win_bottom = win32gui.GetWindowRect(hwnd)
+            
+            # Вычисляемую нужную область относительно экрана
+            area_left, area_top, area_width, area_height = area
+            
+            # DEBUG: Выводим информацию для отладки
+            print(f"📸 Capture (BitBlt fallback): window=({win_left}, {win_top}, {win_right}, {win_bottom})")
+            print(f"📸 Area: ({area_left}, {area_top}, {area_width}x{area_height})")
+            
+            # Вычисляем координаты относительно окна
+            rel_left = area_left - win_left
+            rel_top = area_top - win_top
+            
+            # Проверяем, что область в пределах окна
+            if rel_left < 0 or rel_top < 0 or rel_left + area_width > (win_right - win_left) or rel_top + area_height > (win_bottom - win_top):
+                print(f"⚠️  Area out of bounds, using fallback method")
+                # Если область выходит за пределы окна, захватываем всё окно и обрезаем
+                return self._capture_full_window_and_crop(hwnd, win_left, win_top, win_right, win_bottom, 
+                                                         area_left, area_top, area_width, area_height)
+            
+            # Захватываем ТОЛЬКО нужную область (оптимизировано)
+            hwndDC = win32gui.GetWindowDC(hwnd)
+            mfcDC = win32ui.CreateDCFromHandle(hwndDC)
+            saveDC = mfcDC.CreateCompatibleDC()
+
+            saveBitMap = win32ui.CreateBitmap()
+            saveBitMap.CreateCompatibleBitmap(mfcDC, area_width, area_height)
+            saveDC.SelectObject(saveBitMap)
+
+            result = windll.gdi32.BitBlt(saveDC.GetSafeHdc(), 0, 0, area_width, area_height,
+                                       hwndDC, rel_left, rel_top, win32con.SRCCOPY)
+
+            if result:
+                bmpinfo = saveBitMap.GetInfo()
+                bmpstr = saveBitMap.GetBitmapBits(True)
+                img = Image.frombuffer('RGB', (bmpinfo['bmWidth'], bmpinfo['bmHeight']),
+                                      bmpstr, 'raw', 'BGRX', 0, 1)
+
+                win32gui.DeleteObject(saveBitMap.GetHandle())
+                saveDC.DeleteDC()
+                mfcDC.DeleteDC()
+                win32gui.ReleaseDC(hwnd, hwndDC)
+
+                return img
+
+        except Exception as e:
+            # Fallback на метод с захватом полного окна
+            try:
+                return self._capture_full_window_and_crop(hwnd, win_left, win_top, win_right, win_bottom,
+                                                         area_left, area_top, area_width, area_height)
+            except:
+                pass
+
+        return None
+    
+    def _capture_full_window_and_crop(self, hwnd, win_left, win_top, win_right, win_bottom,
+                                     area_left, area_top, area_width, area_height):
+        """Захватывает всё окно и обрезает до нужной области (fallback метод)"""
+        try:
+            width = win_right - win_left
+            height = win_bottom - win_top
 
             hwndDC = win32gui.GetWindowDC(hwnd)
             mfcDC = win32ui.CreateDCFromHandle(hwndDC)
@@ -200,9 +269,8 @@ class GameConnector:
                 full_image = Image.frombuffer('RGB', (bmpinfo['bmWidth'], bmpinfo['bmHeight']),
                                             bmpstr, 'raw', 'BGRX', 0, 1)
 
-                area_left, area_top, area_width, area_height = area
-                rel_left = area_left - left
-                rel_top = area_top - top
+                rel_left = area_left - win_left
+                rel_top = area_top - win_top
 
                 cropped = full_image.crop((rel_left, rel_top,
                                          rel_left + area_width,
@@ -227,3 +295,28 @@ class GameConnector:
             pass
 
         return None
+    
+    def capture_area_mss(self, area):
+        """
+        Захватывает область экрана через mss (быстро и надёжно)
+        Args:
+            area: Tuple of (left, top, width, height) in screen coordinates
+        Returns:
+            PIL Image or None if capture failed
+        """
+        try:
+            area_left, area_top, area_width, area_height = area
+            
+            with mss.mss() as sct:
+                monitor = {
+                    "top": area_top,
+                    "left": area_left,
+                    "width": area_width,
+                    "height": area_height
+                }
+                sct_img = sct.grab(monitor)
+                img = Image.frombytes("RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")
+                return img
+        except Exception as e:
+            print(f"❌ MSS capture failed: {e}")
+            return None
