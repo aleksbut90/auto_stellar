@@ -47,7 +47,7 @@ class OCREngine:
             )
             text1 = pytesseract.image_to_string(
                 Image.fromarray(thresh),
-                lang="rus+eng",
+                lang="rus",
                 config="--oem 3 --psm 6"
             )
             text1 = self._fix_cyrillic_text(text1)
